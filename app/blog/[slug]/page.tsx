@@ -48,10 +48,10 @@ async function BlogPosts() {
       date: "May 15, 2025",
       author: {
         name: "Sarah Johnson",
-        avatar: "/placeholder.svg?height=40&width=40",
+        avatar: "/background1.png?height=40&width=40",
         bio: "Frontend Developer specializing in React and Next.js",
       },
-      coverImage: "/placeholder.svg?height=600&width=1200",
+      coverImage: "/background1.png?height=600&width=1200",
       slug: "getting-started-with-nextjs-15",
     },
     {
