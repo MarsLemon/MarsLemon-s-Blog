@@ -6,7 +6,11 @@ import { env } from "./config";
  * Make sure you set the NEON database connection string in your
  * environment variables as DATABASE_URL.
  */
-export const sql = neon(env.DATABASE_URL as string);
+export const sql = neon(
+  (process.env.NODE_ENV === "production"
+    ? process.env.DATABASE_URL
+    : env.DATABASE_URL) as string
+);
 
 /**
  * Post table row type.

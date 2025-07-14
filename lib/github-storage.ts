@@ -29,10 +29,22 @@ export class GitHubStorage {
   private branch: string;
 
   constructor() {
-    this.owner = env.GITHUB_OWNER || "";
-    this.repo = env.GITHUB_REPO || "";
-    this.token = env.GITHUB_TOKEN || "";
-    this.branch = env.GITHUB_BRANCH || "main";
+    this.owner =
+      ((process.env.NODE_ENV === "production"
+        ? process.env.GITHUB_OWNER
+        : env.GITHUB_OWNER) as string) || "";
+    this.repo =
+      ((process.env.NODE_ENV === "production"
+        ? process.env.GITHUB_REPO
+        : env.GITHUB_REPO) as string) || "";
+    this.token =
+      ((process.env.NODE_ENV === "production"
+        ? process.env.GITHUB_TOKEN
+        : env.GITHUB_TOKEN) as string) || "";
+    this.branch =
+      ((process.env.NODE_ENV === "production"
+        ? process.env.GITHUB_BRANCH
+        : env.GITHUB_BRANCH) as string) || "main";
   }
 
   private getApiUrl(path: string): string {
