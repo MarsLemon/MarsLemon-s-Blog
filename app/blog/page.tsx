@@ -1,94 +1,59 @@
-import { PostCard } from "@/components/post-card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { getPublishedPosts } from "@/lib/blog-storage"
+import Link from "next/link"
 
 export default function BlogPage() {
-  // This would typically come from a CMS or API
-  const allPosts = [
-    {
-      id: "1",
-      title: "Getting Started with Next.js 15",
-      excerpt: "Learn how to build modern web applications with the latest version of Next.js",
-      date: "May 15, 2025",
-      author: {
-        name: "Sarah Johnson",
-        avatar: "/placeholder.svg?height=40&width=40",
-      },
-      coverImage: "/placeholder.svg?height=400&width=600",
-      slug: "getting-started-with-nextjs-15",
-    },
-    {
-      id: "2",
-      title: "Building Accessible Web Applications",
-      excerpt: "Best practices for creating inclusive web experiences for all users",
-      date: "May 10, 2025",
-      author: {
-        name: "Alex Chen",
-        avatar: "/placeholder.svg?height=40&width=40",
-      },
-      coverImage: "/placeholder.svg?height=400&width=600",
-      slug: "building-accessible-web-applications",
-    },
-    {
-      id: "3",
-      title: "The Future of Web Development",
-      excerpt: "Exploring emerging trends and technologies shaping the web",
-      date: "May 5, 2025",
-      author: {
-        name: "Michael Rodriguez",
-        avatar: "/placeholder.svg?height=40&width=40",
-      },
-      coverImage: "/placeholder.svg?height=400&width=600",
-      slug: "the-future-of-web-development",
-    },
-    {
-      id: "4",
-      title: "Optimizing Performance with React Server Components",
-      excerpt: "How to leverage React Server Components for faster web applications",
-      date: "April 28, 2025",
-      author: {
-        name: "Emily Wong",
-        avatar: "/placeholder.svg?height=40&width=40",
-      },
-      coverImage: "/placeholder.svg?height=400&width=600",
-      slug: "optimizing-performance-with-react-server-components",
-    },
-    {
-      id: "5",
-      title: "CSS-in-JS vs. Utility-First CSS",
-      excerpt: "Comparing different styling approaches for modern web applications",
-      date: "April 20, 2025",
-      author: {
-        name: "David Kim",
-        avatar: "/placeholder.svg?height=40&width=40",
-      },
-      coverImage: "/placeholder.svg?height=400&width=600",
-      slug: "css-in-js-vs-utility-first-css",
-    },
-    {
-      id: "6",
-      title: "Building a Headless CMS with Next.js",
-      excerpt: "A step-by-step guide to creating a flexible content management system",
-      date: "April 15, 2025",
-      author: {
-        name: "Lisa Patel",
-        avatar: "/placeholder.svg?height=40&width=40",
-      },
-      coverImage: "/placeholder.svg?height=400&width=600",
-      slug: "building-a-headless-cms-with-nextjs",
-    },
-  ]
+  const posts = getPublishedPosts()
+
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat("zh-CN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date)
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto mb-12 text-center">
-        <h1 className="text-4xl font-bold mb-4">Blog</h1>
-        <p className="text-muted-foreground">Insights, tutorials, and updates on modern web development</p>
+    <div className="container mx-auto py-8">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold">博客</h1>
+        <p className="text-muted-foreground mt-2">分享技术见解和思考</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        {allPosts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
-      </div>
+      {posts.length === 0 ? (
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <p className="text-muted-foreground">暂无发布的文章</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-6">
+          {posts.map((post) => (
+            <Card key={post.id} className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <Link href={`/blog/${post.id}`}>
+                      <CardTitle className="hover:text-primary cursor-pointer">{post.title}</CardTitle>
+                    </Link>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{formatDate(post.publishedAt!)}</span>
+                      <Badge variant="secondary">已发布</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground line-clamp-3">{post.content.substring(0, 200)}...</p>
+                <Link href={`/blog/${post.id}`} className="inline-block mt-4 text-primary hover:underline">
+                  阅读更多 →
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
