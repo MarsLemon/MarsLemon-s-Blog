@@ -1,5 +1,5 @@
 import { sql, type Post } from "./db"
-import { marked } from "marked"
+import { markdownToHtml as convertMarkdown, extractExcerpt as extractPlainText } from "./markdown"
 
 export async function getAllPosts(): Promise<Post[]> {
   const posts = await sql`
@@ -49,19 +49,9 @@ export function generateSlug(title: string): string {
 }
 
 export function markdownToHtml(markdown: string): string {
-  return marked(markdown)
+  return convertMarkdown(markdown)
 }
 
 export function extractExcerpt(content: string, length = 160): string {
-  // Remove markdown syntax and get plain text
-  const plainText = content
-    .replace(/#{1,6}\s+/g, "") // Remove headers
-    .replace(/\*\*(.*?)\*\*/g, "$1") // Remove bold
-    .replace(/\*(.*?)\*/g, "$1") // Remove italic
-    .replace(/`(.*?)`/g, "$1") // Remove inline code
-    .replace(/\[(.*?)\]$$.*?$$/g, "$1") // Remove links
-    .replace(/\n/g, " ") // Replace newlines with spaces
-    .trim()
-
-  return plainText.length > length ? plainText.substring(0, length) + "..." : plainText
+  return extractPlainText(content, length)
 }
