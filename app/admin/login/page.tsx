@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { PasswordSetup } from "@/components/password-setup"
-import { LoginForm } from "@/components/login-form"
+import { AuthForm } from "@/components/auth-form"
 import { checkAuthStatus } from "../auth-actions"
 
 export default function LoginPage() {
@@ -44,9 +43,5 @@ export default function LoginPage() {
     return null
   }
 
-  return authStatus.hasPassword ? (
-    <LoginForm onSuccess={handleAuthSuccess} />
-  ) : (
-    <PasswordSetup onSuccess={handleAuthSuccess} />
-  )
+  return <AuthForm mode={authStatus.hasPassword ? "login" : "setup"} onSuccess={handleAuthSuccess} />
 }
