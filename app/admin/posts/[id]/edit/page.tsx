@@ -1,42 +1,44 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { PostEditor } from "@/components/admin/post-editor"
-import type { Post } from "@/lib/db"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { PostEditor } from "@/components/admin/post-editor";
+import type { Post } from "@/lib/db";
 
 export default function EditPost({ params }: { params: { id: string } }) {
-  const [post, setPost] = useState<Post | null>(null)
-  const [loading, setLoading] = useState(true)
-  const router = useRouter()
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    fetchPost()
-  }, [])
+    fetchPost();
+  }, []);
 
   const fetchPost = async () => {
     try {
-      const response = await fetch(`/api/admin/posts`)
+      const response = await fetch(`/api/admin/posts`);
       if (response.status === 401) {
-        router.push("/admin/login")
-        return
+        router.push("/admin/login");
+        return;
       }
 
-      const posts = await response.json()
-      const currentPost = posts.find((p: Post) => p.id === Number.parseInt(params.id))
+      const posts = await response.json();
+      const currentPost = posts.find(
+        (p: Post) => p.id === Number.parseInt(params.id)
+      );
 
       if (currentPost) {
-        setPost(currentPost)
+        setPost(currentPost);
       } else {
-        router.push("/admin")
+        router.push("/admin");
       }
     } catch (error) {
-      console.error("Failed to fetch post:", error)
-      router.push("/admin")
+      console.error("Failed to fetch post:", error);
+      router.push("/admin");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSave = async (postData: any) => {
     try {
@@ -46,25 +48,25 @@ export default function EditPost({ params }: { params: { id: string } }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(postData),
-      })
+      });
 
       if (response.ok) {
-        router.push("/admin")
+        router.push("/admin");
       } else {
-        const data = await response.json()
-        throw new Error(data.error || "Failed to update post")
+        const data = await response.json();
+        throw new Error(data.error || "Failed to update post");
       }
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div>Loading...</div>
       </div>
-    )
+    );
   }
 
   if (!post) {
@@ -72,7 +74,7 @@ export default function EditPost({ params }: { params: { id: string } }) {
       <div className="min-h-screen flex items-center justify-center">
         <div>Post not found</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -86,5 +88,5 @@ export default function EditPost({ params }: { params: { id: string } }) {
         <PostEditor post={post} onSave={handleSave} />
       </div>
     </div>
-  )
+  );
 }

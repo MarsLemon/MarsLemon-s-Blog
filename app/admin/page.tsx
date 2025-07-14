@@ -1,67 +1,74 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Plus, Edit, Trash2, Pin, Star, LogOut } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import type { Post } from "@/lib/db"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Edit, Trash2, Pin, Star, LogOut } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import type { Post } from "@/lib/db";
 
 export default function AdminDashboard() {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
-  const router = useRouter()
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
-    fetchPosts()
-  }, [])
+    fetchPosts();
+  }, []);
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch("/api/admin/posts")
+      const response = await fetch("/api/admin/posts", { method: "POST" });
       if (response.status === 401) {
-        router.push("/admin/login")
-        return
+        router.push("/admin/login");
+        return;
       }
+      const postsList = await fetch("/api/admin/posts");
 
-      const data = await response.json()
-      setPosts(data)
+      const data = await postsList.json();
+      setPosts(data);
     } catch (error) {
-      setError("Failed to fetch posts")
+      setError("Failed to fetch posts");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" })
-      router.push("/admin/login")
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/");
     } catch (error) {
-      console.error("Logout failed:", error)
+      console.error("Logout failed:", error);
     }
-  }
+  };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this post?")) return
+    if (!confirm("Are you sure you want to delete this post?")) return;
 
     try {
       const response = await fetch(`/api/admin/posts/${id}`, {
         method: "DELETE",
-      })
+      });
 
       if (response.ok) {
-        setPosts(posts.filter((post) => post.id !== id))
+        setPosts(posts.filter((post) => post.id !== id));
       } else {
-        setError("Failed to delete post")
+        setError("Failed to delete post");
       }
     } catch (error) {
-      setError("Failed to delete post")
+      setError("Failed to delete post");
     }
-  }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -70,15 +77,15 @@ export default function AdminDashboard() {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    })
-  }
+    });
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div>Loading...</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -109,7 +116,10 @@ export default function AdminDashboard() {
 
         <div className="grid gap-6">
           {posts.map((post) => (
-            <Card key={post.id}>
+            <Card
+              key={post.id}
+              onClick={() => router.push(`/admin/posts/${post.id}/edit`)}
+            >
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -131,10 +141,20 @@ export default function AdminDashboard() {
                     <CardDescription>{post.excerpt}</CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => router.push(`/admin/posts/${post.id}/edit`)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        router.push(`/admin/posts/${post.id}/edit`)
+                      }
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDelete(post.id)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(post.id)}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -163,5 +183,5 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }

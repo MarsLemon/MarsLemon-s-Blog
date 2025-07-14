@@ -1,7 +1,7 @@
-import Link from "next/link"
-import { ModeToggle } from "@/components/mode-toggle"
-import { Button } from "@/components/ui/button"
-import { Search } from "lucide-react"
+import Link from "next/link";
+import { ModeToggle } from "@/components/mode-toggle";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 
 export function SiteHeader() {
   return (
@@ -12,7 +12,10 @@ export function SiteHeader() {
             DevBlog
           </Link>
           <nav className="hidden md:flex gap-6">
-            <Link href="/" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link
+              href="/"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Home
             </Link>
             <Link
@@ -21,12 +24,12 @@ export function SiteHeader() {
             >
               Blog
             </Link>
-            <Link
+            {/* <Link
               href="/about"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
             >
               About
-            </Link>
+            </Link> */}
             <Link
               href="/admin"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
@@ -43,5 +46,5 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
-  )
+  );
 }
