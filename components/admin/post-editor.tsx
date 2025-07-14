@@ -228,7 +228,7 @@ export function PostEditor({ post, onSave }: PostEditorProps) {
               </TabsList>
 
               <TabsContent value="write" className="space-y-4">
-                <div className="flex gap-2 mb-2">
+                <div className="flex flex-wrap gap-2 mb-2">
                   <Button type="button" variant="outline" size="sm" onClick={() => insertTextAtCursor("**Bold Text**")}>
                     Bold
                   </Button>
@@ -239,9 +239,33 @@ export function PostEditor({ post, onSave }: PostEditorProps) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => insertTextAtCursor("\n## Heading\n")}
+                    onClick={() => insertTextAtCursor("~~Strikethrough~~")}
                   >
-                    Heading
+                    Strike
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertTextAtCursor("\n# Heading 1\n")}
+                  >
+                    H1
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertTextAtCursor("\n## Heading 2\n")}
+                  >
+                    H2
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertTextAtCursor("\n### Heading 3\n")}
+                  >
+                    H3
                   </Button>
                   <Button
                     type="button"
@@ -255,9 +279,69 @@ export function PostEditor({ post, onSave }: PostEditorProps) {
                     type="button"
                     variant="outline"
                     size="sm"
+                    onClick={() => insertTextAtCursor("\n1. Numbered item\n")}
+                  >
+                    Numbers
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertTextAtCursor("- [ ] Task item\n")}
+                  >
+                    Task
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={() => insertTextAtCursor("[Link Text](https://example.com)")}
                   >
                     Link
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertTextAtCursor("![Alt Text](image-url)")}
+                  >
+                    Image
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertTextAtCursor("\n```javascript\ncode here\n```\n")}
+                  >
+                    Code
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertTextAtCursor("\n> Blockquote\n")}
+                  >
+                    Quote
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      insertTextAtCursor(
+                        "\n| Header 1 | Header 2 |\n|----------|----------|\n| Cell 1   | Cell 2   |\n",
+                      )
+                    }
+                  >
+                    Table
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertTextAtCursor("\n> [!NOTE]\n> This is a note\n")}
+                  >
+                    Alert
                   </Button>
                 </div>
 

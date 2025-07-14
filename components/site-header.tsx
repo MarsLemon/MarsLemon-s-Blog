@@ -27,6 +27,12 @@ export function SiteHeader() {
             >
               About
             </Link>
+            <Link
+              href="/admin"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+              Admin
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-2">

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 import { verifyAdminToken } from "@/lib/verify-token"
+import { GitHubStorage } from "@/lib/github-storage"
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,26 +34,29 @@ export async function POST(request: NextRequest) {
       folder = "documents"
     }
 
-    // Generate unique filename
-    const timestamp = Date.now()
-    const extension = originalName.split(".").pop()
-    const filename = `${timestamp}.${extension}`
-    const filePath = `/uploads/${folder}/${filename}`
+    // Upload to GitHub
+    const githubStorage = new GitHubStorage()
+    const { url, path } = await githubStorage.uploadFile(file, folder)
 
-    // In a real application, you would save the file to a storage service
-    // For this example, we'll just store the file info in the database
+    // Store file info in database
     const result = await sql`
       INSERT INTO files (filename, original_name, file_path, file_type, file_size, folder)
-      VALUES (${filename}, ${originalName}, ${filePath}, ${fileType}, ${fileSize}, ${folder})
+      VALUES (${path.split("/").pop()}, ${originalName}, ${path}, ${fileType}, ${fileSize}, ${folder})
       RETURNING *
     `
 
     return NextResponse.json({
       success: true,
       file: result[0],
-      url: filePath,
+      url: url,
     })
   } catch (error) {
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 })
+    console.error("Upload error:", error)
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Upload failed",
+      },
+      { status: 500 },
+    )
   }
 }
