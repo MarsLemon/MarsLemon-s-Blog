@@ -17,7 +17,8 @@
     "error": "错误",
     "success": "成功",
     "warning": "警告",
-    "info": "信息"
+    "info": "信息",
+    "notFound": "当前页面没有找到"
   },
   "nav": {
     "home": "首页",
