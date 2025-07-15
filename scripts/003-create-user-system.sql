@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 INSERT INTO users (username, email, password_hash, is_admin, is_verified, avatar_url) 
 VALUES (
     'Mars', 
-    'mars@admin.com', 
+    '1428485959@qq.com', 
     '$2a$12$8K1p/a0dclxKxYqmhQhXUeL4f/Aq2qVVdw2E8Aq2qVVdw2E8Aq2qVV', -- Mars9807130015
     true, 
     true,
