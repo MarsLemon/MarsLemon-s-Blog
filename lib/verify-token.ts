@@ -1,23 +1,31 @@
-import type { NextRequest } from "next/server";
-import jwt from "jsonwebtoken";
-import { env } from "./config";
-
-const JWT_SECRET =
-  ((process.env.NODE_ENV === "production"
-    ? process.env.JWT_SECRET
-    : env.JWT_SECRET) as string) || "your-secret-key";
+import type { NextRequest } from "next/server"
+import { getSessionUser } from "./auth"
 
 export async function verifyAdminToken(request: NextRequest): Promise<boolean> {
   try {
-    const token = request.cookies.get("admin-token")?.value;
+    const sessionToken = request.cookies.get("session-token")?.value
 
-    if (!token) {
-      return false;
+    if (!sessionToken) {
+      return false
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET) as { admin: boolean };
-    return decoded.admin === true;
+    const user = await getSessionUser(sessionToken)
+    return user?.is_admin === true
   } catch (error) {
-    return false;
+    return false
+  }
+}
+
+export async function getCurrentUser(request: NextRequest) {
+  try {
+    const sessionToken = request.cookies.get("session-token")?.value
+
+    if (!sessionToken) {
+      return null
+    }
+
+    return await getSessionUser(sessionToken)
+  } catch (error) {
+    return null
   }
 }

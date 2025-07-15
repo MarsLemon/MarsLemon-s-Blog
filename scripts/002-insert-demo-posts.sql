@@ -25,7 +25,7 @@ The App Router in Next.js 15 builds on the foundation laid in previous versions,
 
 Next.js 15 introduces new patterns for data fetching that work seamlessly with Server Components. You can now fetch data directly in your components without needing to use API routes or client-side fetching libraries.
 
-```javascript
+\`\`\`javascript
 // Example of data fetching in a Server Component
 async function BlogPosts() {
   const posts = await getPosts();
