@@ -4,13 +4,13 @@ import { cookies } from "next/headers"
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const { emailOrUsername, password } = await request.json()
 
-    if (!email || !password) {
-      return NextResponse.json({ error: "Email and password are required" }, { status: 400 })
+    if (!emailOrUsername || !password) {
+      return NextResponse.json({ error: "Email/Username and password are required" }, { status: 400 })
     }
 
-    const user = await verifyUser(email, password)
+    const user = await verifyUser(emailOrUsername, password)
     if (!user) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
     }

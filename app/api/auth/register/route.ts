@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createUser, getUserByEmail } from "@/lib/auth"
-import { sql } from "@/lib/db" // Declare the sql variable
+import { createUser, getUserByEmail, getUserByUsername } from "@/lib/auth"
+import { sql } from "@/lib/db"
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,17 +19,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid email format" }, { status: 400 })
     }
 
-    // Check if user already exists
-    const existingUser = await getUserByEmail(email)
-    if (existingUser) {
-      return NextResponse.json({ error: "User already exists" }, { status: 400 })
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+      return NextResponse.json(
+        { error: "Username must be 3-20 characters and contain only letters, numbers, and underscores" },
+        { status: 400 },
+      )
+    }
+
+    // Check if email already exists
+    const existingUserByEmail = await getUserByEmail(email)
+    if (existingUserByEmail) {
+      return NextResponse.json({ error: "Email already exists" }, { status: 400 })
+    }
+
+    // Check if username already exists
+    const existingUserByUsername = await getUserByUsername(username)
+    if (existingUserByUsername) {
+      return NextResponse.json({ error: "Username already exists" }, { status: 400 })
     }
 
     // Create user
     const user = await createUser(username, email, password)
 
-    // In a real app, you would send verification email here
-    // For demo purposes, we'll auto-verify
+    // Auto-verify for demo purposes
     await sql`UPDATE users SET is_verified = true WHERE id = ${user.id}`
 
     return NextResponse.json({

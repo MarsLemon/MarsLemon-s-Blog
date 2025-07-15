@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useUser } from "@/lib/user-context"
+import { useTranslations } from "next-intl"
 
 interface LoginFormProps {
   onSuccess: () => void
@@ -14,11 +15,12 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
-  const [email, setEmail] = useState("")
+  const [emailOrUsername, setEmailOrUsername] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const { login } = useUser()
+  const t = useTranslations("auth")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,10 +28,10 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
     setLoading(true)
 
     try {
-      await login(email, password)
+      await login(emailOrUsername, password)
       onSuccess()
     } catch (error: any) {
-      setError(error.message || "Login failed")
+      setError(error.message || t("loginFailed"))
     } finally {
       setLoading(false)
     }
@@ -44,36 +46,35 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="emailOrUsername">{t("emailOrUsername")}</Label>
         <Input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your email"
+          id="emailOrUsername"
+          value={emailOrUsername}
+          onChange={(e) => setEmailOrUsername(e.target.value)}
+          placeholder={t("emailOrUsername")}
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t("password")}</Label>
         <Input
           id="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter your password"
+          placeholder={t("password")}
           required
         />
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Logging in..." : "Login"}
+        {loading ? `${t("login")}...` : t("login")}
       </Button>
 
       <div className="text-center">
         <Button type="button" variant="link" onClick={onSwitchToRegister}>
-          Don't have an account? Register
+          {t("dontHaveAccount")}
         </Button>
       </div>
     </form>

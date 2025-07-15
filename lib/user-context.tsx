@@ -7,7 +7,7 @@ import type { User } from "./auth"
 interface UserContextType {
   user: User | null
   loading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (emailOrUsername: string, password: string) => Promise<void>
   logout: () => Promise<void>
   register: (username: string, email: string, password: string) => Promise<void>
   updateAvatar: (file: File) => Promise<void>
@@ -36,13 +36,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const login = async (email: string, password: string) => {
+  const login = async (emailOrUsername: string, password: string) => {
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ emailOrUsername, password }),
     })
 
     const data = await response.json()

@@ -33,11 +33,12 @@ export async function createUser(username: string, email: string, password: stri
   return result[0] as User
 }
 
-export async function verifyUser(email: string, password: string): Promise<User | null> {
+export async function verifyUser(emailOrUsername: string, password: string): Promise<User | null> {
+  // 支持邮箱或用户名登录
   const result = await sql`
     SELECT id, username, email, password_hash, avatar_url, is_admin, is_verified, created_at
     FROM users 
-    WHERE email = ${email} AND is_verified = true
+    WHERE (email = ${emailOrUsername} OR username = ${emailOrUsername}) AND is_verified = true
   `
 
   if (result.length === 0) return null
@@ -73,6 +74,16 @@ export async function getUserByEmail(email: string): Promise<User | null> {
     SELECT id, username, email, avatar_url, is_admin, is_verified, created_at
     FROM users 
     WHERE email = ${email}
+  `
+
+  return result.length > 0 ? (result[0] as User) : null
+}
+
+export async function getUserByUsername(username: string): Promise<User | null> {
+  const result = await sql`
+    SELECT id, username, email, avatar_url, is_admin, is_verified, created_at
+    FROM users 
+    WHERE username = ${username}
   `
 
   return result.length > 0 ? (result[0] as User) : null
