@@ -1,45 +1,34 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { verifyUser, createSession } from "@/lib/auth"
-import { cookies } from "next/headers"
+import { type NextRequest, NextResponse } from "next/server";
+import { verifyAdmin } from "@/lib/auth";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import { env } from "@/lib/config";
+
+const JWT_SECRET = env.JWT_SECRET || "your-secret-key";
 
 export async function POST(request: NextRequest) {
   try {
-    const { emailOrUsername, password } = await request.json()
+    const { password } = await request.json();
 
-    if (!emailOrUsername || !password) {
-      return NextResponse.json({ error: "Email/Username and password are required" }, { status: 400 })
+    const isValid = await verifyAdmin(password);
+    if (!isValid) {
+      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
-    const user = await verifyUser(emailOrUsername, password)
-    if (!user) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
-    }
-
-    // Create session
-    const sessionToken = await createSession(user.id)
+    // Create JWT token
+    const token = jwt.sign({ admin: true }, JWT_SECRET, { expiresIn: "24h" });
 
     // Set cookie
-    const cookieStore = await cookies()
-    cookieStore.set("session-token", sessionToken, {
+    const cookieStore = await cookies();
+    cookieStore.set("admin-token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: "/",
-    })
+      maxAge: 24 * 60 * 60, // 24 hours
+    });
 
-    return NextResponse.json({
-      success: true,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatar_url: user.avatar_url,
-        is_admin: user.is_admin,
-      },
-    })
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Login error:", error)
-    return NextResponse.json({ error: "Login failed" }, { status: 500 })
+    return NextResponse.json({ error: "Login failed" }, { status: 500 });
   }
 }
