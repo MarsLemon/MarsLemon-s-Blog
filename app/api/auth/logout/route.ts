@@ -1,16 +1,22 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
+import { deleteSession } from "@/lib/auth"
 import { cookies } from "next/headers"
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies()
+    const sessionToken = request.cookies.get("session-token")?.value
 
-    // Delete the admin token cookie
-    cookieStore.set("admin-token", "", {
+    if (sessionToken) {
+      await deleteSession(sessionToken)
+    }
+
+    // Clear cookie
+    cookieStore.set("session-token", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 0, // Expire immediately
+      maxAge: 0,
       path: "/",
     })
 

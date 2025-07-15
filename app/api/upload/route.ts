@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 import { verifyAdminToken } from "@/lib/verify-token"
-import { GitHubStorage } from "@/lib/github-storage"
+import { BlobStorage } from "@/lib/blob-storage"
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,9 +34,9 @@ export async function POST(request: NextRequest) {
       folder = "documents"
     }
 
-    // Upload to GitHub
-    const githubStorage = new GitHubStorage()
-    const { url, path } = await githubStorage.uploadFile(file, folder)
+    // Upload to Vercel Blob
+    const blobStorage = new BlobStorage()
+    const { url, path } = await blobStorage.uploadFile(file, folder)
 
     // Store file info in database
     const result = await sql`

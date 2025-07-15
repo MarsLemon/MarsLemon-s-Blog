@@ -5,25 +5,37 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Edit, Trash2, Pin, Star, LogOut } from "lucide-react"
+import { Plus, Edit, Trash2, Pin, Star } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useUser } from "@/lib/user-context"
 import type { Post } from "@/lib/db"
 
 export default function AdminDashboard() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const { user, loading: userLoading } = useUser()
   const router = useRouter()
 
   useEffect(() => {
-    fetchPosts()
-  }, [])
+    if (!userLoading) {
+      if (!user) {
+        router.push("/")
+        return
+      }
+      if (!user.is_admin) {
+        router.push("/")
+        return
+      }
+      fetchPosts()
+    }
+  }, [user, userLoading, router])
 
   const fetchPosts = async () => {
     try {
       const response = await fetch("/api/admin/posts")
       if (response.status === 401) {
-        router.push("/admin/login")
+        router.push("/")
         return
       }
 
@@ -33,15 +45,6 @@ export default function AdminDashboard() {
       setError("Failed to fetch posts")
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" })
-      router.push("/admin/login")
-    } catch (error) {
-      console.error("Logout failed:", error)
     }
   }
 
@@ -73,10 +76,18 @@ export default function AdminDashboard() {
     })
   }
 
-  if (loading) {
+  if (userLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div>Loading...</div>
+      </div>
+    )
+  }
+
+  if (!user || !user.is_admin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div>Access denied</div>
       </div>
     )
   }
@@ -93,10 +104,6 @@ export default function AdminDashboard() {
             <Button onClick={() => router.push("/admin/posts/new")}>
               <Plus className="mr-2 h-4 w-4" />
               New Post
-            </Button>
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
             </Button>
           </div>
         </div>
