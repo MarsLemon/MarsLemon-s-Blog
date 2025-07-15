@@ -10,5 +10,4 @@ export default createMiddleware({
 export const config = {
   // Skip API routes, Next.js internals, the Next.js not-found helper,
   // static files, and any path that starts with “_”
-  matcher: ["/((?!api|_next|_vercel).*)"],
 }
