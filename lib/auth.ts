@@ -123,3 +123,24 @@ export async function updateUserAvatar(userId: number, avatarUrl: string): Promi
     WHERE id = ${userId}
   `
 }
+
+/**
+ * Check if at least one admin account exists.
+ */
+export async function checkAdminExists(): Promise<boolean> {
+  const result = await sql`SELECT COUNT(*) AS count FROM users WHERE is_admin = true`
+  return Number(result[0].count) > 0
+}
+
+/**
+ * Programmatically create an admin account.
+ * If a user with the same username/email already exists it will be ignored.
+ */
+export async function createAdmin(username: string, email: string, password: string): Promise<void> {
+  const hashed = await hashPassword(password)
+  await sql`
+    INSERT INTO users (username, email, password_hash, is_admin, is_verified)
+    VALUES (${username}, ${email}, ${hashed}, true, true)
+    ON CONFLICT (email) DO NOTHING
+  `
+}
