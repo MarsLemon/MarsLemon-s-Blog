@@ -13,9 +13,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    serverComponentsExternalPackages: ['@neondatabase/serverless']
-  }
+  serverExternalPackages: ["@neondatabase/serverless"],
 };
 
 export default withNextIntl(nextConfig);
