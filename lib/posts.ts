@@ -14,34 +14,19 @@ export interface Post {
   published: boolean
   created_at: string
   updated_at: string
-  author_id?: number
   author_name?: string
 }
 
 // 获取所有文章
 export async function getPosts(limit?: number): Promise<Post[]> {
   try {
-    let query
-    if (limit) {
-      query = sql`
-        SELECT p.*, u.username as author_name
-        FROM posts p
-        LEFT JOIN users u ON p.author_id = u.id
-        WHERE p.published = true
-        ORDER BY p.created_at DESC
-        LIMIT ${limit}
-      `
-    } else {
-      query = sql`
-        SELECT p.*, u.username as author_name
-        FROM posts p
-        LEFT JOIN users u ON p.author_id = u.id
-        WHERE p.published = true
-        ORDER BY p.created_at DESC
-      `
-    }
-
-    const result = await query
+    const result = await sql`
+      SELECT *
+      FROM posts
+      WHERE published = true
+      ORDER BY created_at DESC
+      ${limit ? sql`LIMIT ${limit}` : sql``}
+    `
     return result as Post[]
   } catch (error) {
     console.error("获取文章错误:", error)
@@ -53,10 +38,9 @@ export async function getPosts(limit?: number): Promise<Post[]> {
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   try {
     const result = await sql`
-      SELECT p.*, u.username as author_name
-      FROM posts p
-      LEFT JOIN users u ON p.author_id = u.id
-      WHERE p.slug = ${slug} AND p.published = true
+      SELECT *
+      FROM posts
+      WHERE slug = ${slug} AND published = true
       LIMIT 1
     `
 
@@ -71,11 +55,10 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 export async function getFeaturedPosts(limit = 3): Promise<Post[]> {
   try {
     const result = await sql`
-      SELECT p.*, u.username as author_name
-      FROM posts p
-      LEFT JOIN users u ON p.author_id = u.id
-      WHERE p.published = true AND p.featured_image IS NOT NULL
-      ORDER BY p.created_at DESC
+      SELECT *
+      FROM posts
+      WHERE published = true AND featured_image IS NOT NULL
+      ORDER BY created_at DESC
       LIMIT ${limit}
     `
 
@@ -90,10 +73,9 @@ export async function getFeaturedPosts(limit = 3): Promise<Post[]> {
 export async function getAllPosts(): Promise<Post[]> {
   try {
     const result = await sql`
-      SELECT p.*, u.username as author_name
-      FROM posts p
-      LEFT JOIN users u ON p.author_id = u.id
-      ORDER BY p.created_at DESC
+      SELECT *
+      FROM posts
+      ORDER BY created_at DESC
     `
 
     return result as Post[]
@@ -107,10 +89,9 @@ export async function getAllPosts(): Promise<Post[]> {
 export async function getPostById(id: number): Promise<Post | null> {
   try {
     const result = await sql`
-      SELECT p.*, u.username as author_name
-      FROM posts p
-      LEFT JOIN users u ON p.author_id = u.id
-      WHERE p.id = ${id}
+      SELECT *
+      FROM posts
+      WHERE id = ${id}
       LIMIT 1
     `
 
@@ -129,12 +110,11 @@ export async function createPost(
   excerpt: string,
   featuredImage: string | null,
   published: boolean,
-  authorId: number,
 ): Promise<Post | null> {
   try {
     const result = await sql`
-      INSERT INTO posts (title, slug, content, excerpt, featured_image, published, author_id)
-      VALUES (${title}, ${slug}, ${content}, ${excerpt}, ${featuredImage}, ${published}, ${authorId})
+      INSERT INTO posts (title, slug, content, excerpt, featured_image, published)
+      VALUES (${title}, ${slug}, ${content}, ${excerpt}, ${featuredImage}, ${published})
       RETURNING *
     `
 
@@ -157,10 +137,14 @@ export async function updatePost(
 ): Promise<Post | null> {
   try {
     const result = await sql`
-      UPDATE posts 
-      SET title = ${title}, slug = ${slug}, content = ${content}, 
-          excerpt = ${excerpt}, featured_image = ${featuredImage}, 
-          published = ${published}, updated_at = NOW()
+      UPDATE posts
+      SET title = ${title},
+          slug = ${slug},
+          content = ${content},
+          excerpt = ${excerpt},
+          featured_image = ${featuredImage},
+          published = ${published},
+          updated_at = NOW()
       WHERE id = ${id}
       RETURNING *
     `
