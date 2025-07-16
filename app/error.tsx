@@ -10,7 +10,12 @@ interface ErrorProps {
 
 const ErrorPage: NextPage<ErrorProps> = ({ error, reset }) => {
   useEffect(() => {
-    console.error('Page error:', error);
+    if (process.env.NODE_ENV === 'production') {
+      window.gtag('event', 'exception', {
+        description: error.message,
+        fatal: false
+      });
+    }
   }, [error]);
 
   return (
