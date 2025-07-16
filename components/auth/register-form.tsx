@@ -4,40 +4,25 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
+import { useUser } from "@/lib/user-context"
 
-export function RegisterForm() {
+export default function RegisterForm() {
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { toast } = useToast()
+  const { refreshUser } = useUser()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
-    setSuccess("")
-    setIsLoading(true)
-
-    // 客户端验证
-    if (password !== confirmPassword) {
-      setError("密码不匹配")
-      setIsLoading(false)
-      return
-    }
-
-    if (password.length < 6) {
-      setError("密码至少需要6个字符")
-      setIsLoading(false)
-      return
-    }
+    setLoading(true)
 
     try {
       const response = await fetch("/api/auth/register", {
@@ -45,114 +30,91 @@ export function RegisterForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-        }),
+        body: JSON.stringify({ username, email, password }),
       })
 
       const data = await response.json()
 
-      if (data.success) {
-        setSuccess("账户创建成功！现在可以登录了。")
-        setTimeout(() => {
-          router.push("/admin/login")
-        }, 2000)
+      if (response.ok) {
+        toast({
+          title: "注册成功",
+          description: "您已成功注册并登录。",
+        })
+        refreshUser() // 刷新用户上下文
+        router.push("/") // 注册成功后跳转到首页
       } else {
-        setError(data.message || "注册失败")
+        toast({
+          title: "注册失败",
+          description: data.message || "注册失败，请检查您的输入。",
+          variant: "destructive",
+        })
       }
     } catch (error) {
-      setError("网络错误，请重试")
+      console.error("注册请求失败:", error)
+      toast({
+        title: "错误",
+        description: "网络或服务器错误，请稍后再试。",
+        variant: "destructive",
+      })
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">创建账户</CardTitle>
-          <CardDescription className="text-center">填写以下信息来创建您的账户</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {success && (
-              <Alert>
-                <AlertDescription>{success}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="username">用户名</Label>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                placeholder="输入用户名（3-20个字符）"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">邮箱</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="输入邮箱地址"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">密码</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="输入密码（至少6个字符）"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">确认密码</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                placeholder="再次输入密码"
-              />
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "创建中..." : "创建账户"}
-            </Button>
-          </form>
-
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
-              已有账户？{" "}
-              <Button variant="link" className="p-0 h-auto font-normal" onClick={() => router.push("/admin/login")}>
-                立即登录
-              </Button>
-            </p>
+    <Card className="w-full max-w-md">
+      <CardHeader className="space-y-1 text-center">
+        <CardTitle className="text-2xl font-bold">注册</CardTitle>
+        <CardDescription>创建一个新账户。</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="username">用户名</Label>
+            <Input
+              id="username"
+              type="text"
+              placeholder="请输入用户名"
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">邮箱</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="请输入邮箱"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">密码</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="请输入密码"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "注册中..." : "注册"}
+          </Button>
+        </form>
+      </CardContent>
+      <CardFooter className="text-center text-sm text-muted-foreground">
+        <p>
+          已有账户？
+          <a className="underline" href="/login">
+            登录
+          </a>
+        </p>
+      </CardFooter>
+    </Card>
   )
 }

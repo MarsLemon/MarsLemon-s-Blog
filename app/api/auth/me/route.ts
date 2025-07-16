@@ -1,16 +1,15 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { getCurrentUser } from "@/lib/verify-token"
+import { NextResponse } from "next/server"
+import { getSessionUser } from "@/lib/auth"
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const user = await getCurrentUser(request)
-
+    const user = await getSessionUser()
     if (!user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+      return NextResponse.json({ message: "未登录" }, { status: 401 })
     }
-
-    return NextResponse.json({ user })
+    return NextResponse.json({ user }, { status: 200 })
   } catch (error) {
-    return NextResponse.json({ error: "Failed to get user" }, { status: 500 })
+    console.error("获取用户信息失败:", error)
+    return NextResponse.json({ message: "服务器错误，获取用户信息失败" }, { status: 500 })
   }
 }

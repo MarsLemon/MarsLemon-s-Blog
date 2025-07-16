@@ -1,4 +1,6 @@
 import { neon } from "@neondatabase/serverless"
+import { marked } from "marked"
+import DOMPurify from "isomorphic-dompurify"
 
 /**
  * DATABASE_URL 请在 Vercel 环境变量或本地 .env 中配置
@@ -102,9 +104,6 @@ export function generateSlug(title: string): string {
 }
 
 // 辅助函数：将 Markdown 转换为 HTML
-import { marked } from "marked"
-import DOMPurify from "isomorphic-dompurify"
-
 export function markdownToHtml(markdown: string): string {
   const html = marked.parse(markdown)
   return DOMPurify.sanitize(html as string)

@@ -4,25 +4,24 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
 import { useUser } from "@/lib/user-context"
 
-export function LoginForm() {
-  const [emailOrUsername, setEmailOrUsername] = useState("")
+export default function LoginForm() {
+  const [identifier, setIdentifier] = useState("") // 可以是用户名或邮箱
   const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const { setUser } = useUser()
+  const { toast } = useToast()
+  const { refreshUser } = useUser()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
-    setIsLoading(true)
+    setLoading(true)
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -30,82 +29,80 @@ export function LoginForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          emailOrUsername,
-          password,
-        }),
+        body: JSON.stringify({ identifier, password }),
       })
 
       const data = await response.json()
 
-      if (data.success) {
-        setUser(data.user)
-        router.push("/admin")
-        router.refresh()
+      if (response.ok) {
+        toast({
+          title: "登录成功",
+          description: "您已成功登录。",
+        })
+        refreshUser() // 刷新用户上下文
+        router.push("/") // 登录成功后跳转到首页
       } else {
-        setError(data.message || "登录失败")
+        toast({
+          title: "登录失败",
+          description: data.message || "用户名或密码不正确。",
+          variant: "destructive",
+        })
       }
     } catch (error) {
-      setError("网络错误，请重试")
+      console.error("登录请求失败:", error)
+      toast({
+        title: "错误",
+        description: "网络或服务器错误，请稍后再试。",
+        variant: "destructive",
+      })
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">登录</CardTitle>
-          <CardDescription className="text-center">输入您的邮箱或用户名和密码来登录</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="emailOrUsername">邮箱或用户名</Label>
-              <Input
-                id="emailOrUsername"
-                type="text"
-                value={emailOrUsername}
-                onChange={(e) => setEmailOrUsername(e.target.value)}
-                required
-                placeholder="输入邮箱或用户名"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">密码</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="输入密码"
-              />
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "登录中..." : "登录"}
-            </Button>
-          </form>
-
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
-              没有账户？{" "}
-              <Button variant="link" className="p-0 h-auto font-normal" onClick={() => router.push("/admin/register")}>
-                立即注册
-              </Button>
-            </p>
+    <Card className="w-full max-w-md">
+      <CardHeader className="space-y-1 text-center">
+        <CardTitle className="text-2xl font-bold">登录</CardTitle>
+        <CardDescription>输入您的用户名/邮箱和密码以登录。</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="identifier">用户名或邮箱</Label>
+            <Input
+              id="identifier"
+              type="text"
+              placeholder="请输入用户名或邮箱"
+              required
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+            />
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">密码</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="请输入密码"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "登录中..." : "登录"}
+          </Button>
+        </form>
+      </CardContent>
+      <CardFooter className="text-center text-sm text-muted-foreground">
+        <p>
+          没有账户？
+          <a className="underline" href="/register">
+            注册
+          </a>
+        </p>
+      </CardFooter>
+    </Card>
   )
 }

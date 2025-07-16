@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server"
-import { getSessionUser } from "./auth"
+import { getSessionUser, type User } from "./auth"
 
 export async function verifyAdminToken(request: NextRequest): Promise<boolean> {
   try {
@@ -28,4 +28,14 @@ export async function getCurrentUser(request: NextRequest) {
   } catch (error) {
     return null
   }
+}
+
+export async function verifyToken(request: NextRequest): Promise<User | null> {
+  const sessionToken = request.cookies.get("session-token")?.value
+
+  if (!sessionToken) {
+    return null
+  }
+
+  return await getSessionUser(sessionToken)
 }

@@ -1,60 +1,44 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { loginUser, createSession } from "@/lib/auth"
+import { NextResponse } from "next/server"
+import { getUserByUsernameOrEmail, verifyPassword, createSession } from "@/lib/auth"
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    console.log("登录API被调用")
+    const { identifier, password } = await request.json()
 
-    const body = await request.json()
-    console.log("请求体:", body)
-
-    const { emailOrUsername, password } = body
-
-    if (!emailOrUsername || !password) {
-      console.log("缺少必需字段")
-      return NextResponse.json({ success: false, message: "邮箱/用户名和密码都是必需的" }, { status: 400 })
+    if (!identifier || !password) {
+      return NextResponse.json({ message: "用户名/邮箱和密码是必填项" }, { status: 400 })
     }
 
-    const result = await loginUser(emailOrUsername, password)
-    console.log("登录结果:", result)
+    const user = await getUserByUsernameOrEmail(identifier)
 
-    if (result.success && result.user) {
-      // 创建会话
-      const sessionToken = await createSession(result.user.id)
-
-      const response = NextResponse.json({
-        success: true,
-        user: result.user,
-        message: result.message,
-      })
-
-      // 设置HTTP-only cookie
-      response.cookies.set("auth-token", sessionToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60, // 7天
-        path: "/",
-      })
-
-      return response
-    } else {
-      return NextResponse.json(
-        {
-          success: false,
-          message: result.message,
-        },
-        { status: 401 },
-      )
+    if (!user) {
+      console.log(`登录失败: 用户 ${identifier} 不存在`)
+      return NextResponse.json({ message: "用户名或密码不正确" }, { status: 401 })
     }
+
+    // 假设 user 对象中包含 password_hash 字段
+    const isPasswordValid = await verifyPassword(password, (user as any).password_hash)
+
+    if (!isPasswordValid) {
+      console.log(`登录失败: 用户 ${identifier} 密码不正确`)
+      return NextResponse.json({ message: "用户名或密码不正确" }, { status: 401 })
+    }
+
+    // 移除敏感信息
+    const userWithoutHash = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      avatar_url: user.avatar_url,
+      is_admin: user.is_admin,
+      is_verified: user.is_verified,
+    }
+
+    await createSession(userWithoutHash)
+
+    return NextResponse.json({ message: "登录成功", user: userWithoutHash }, { status: 200 })
   } catch (error) {
-    console.error("登录API错误:", error)
-    return NextResponse.json(
-      {
-        success: false,
-        message: `服务器错误: ${error}`,
-      },
-      { status: 500 },
-    )
+    console.error("登录失败:", error)
+    return NextResponse.json({ message: "服务器错误，登录失败" }, { status: 500 })
   }
 }

@@ -1,108 +1,68 @@
 import { SignJWT, jwtVerify } from "jose"
 import { cookies } from "next/headers"
 import { neon } from "@neondatabase/serverless"
+import bcrypt from "bcryptjs"
 
 const sql = neon(process.env.DATABASE_URL!)
 
-// 确保 JWT_SECRET 环境变量已设置
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key-please-change-this-in-production"
-const secret = new TextEncoder().encode(JWT_SECRET)
+const secretKey = process.env.JWT_SECRET || "default_secret_key_for_dev_only_please_change_this_in_prod"
+const encodedKey = new TextEncoder().encode(secretKey)
 
-// 会话过期时间（例如：7 天）
-const EXPIRES_IN_SECONDS = 60 * 60 * 24 * 7
-
-export interface UserSession {
-  id: string
+export interface User {
+  id: number
   username: string
   email: string
+  avatar_url: string | null
   is_admin: boolean
-  avatar_url?: string | null
-  expires_at: number
+  is_verified: boolean
 }
 
-/**
- * 创建用户会话 Token
- */
-export async function createSession(user: {
-  id: string
-  username: string
-  email: string
-  is_admin: boolean
-  avatar_url?: string | null
-}): Promise<string> {
-  const expires_at = Math.floor(Date.now() / 1000) + EXPIRES_IN_SECONDS
-  const session: UserSession = {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    is_admin: user.is_admin,
-    avatar_url: user.avatar_url,
-    expires_at,
-  }
-
-  const token = await new SignJWT(session)
+export async function encrypt(payload: any) {
+  return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime(expires_at)
-    .sign(secret)
-
-  cookies().set("session-token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    expires: new Date(expires_at * 1000),
-  })
-
-  return token
+    .setExpirationTime("2h") // Token expires in 2 hours
+    .sign(encodedKey)
 }
 
-/**
- * 验证会话 Token 并获取用户数据
- */
-export async function verifySession(token: string): Promise<UserSession | null> {
+export async function decrypt(session: string | undefined = ""): Promise<User | null> {
   try {
-    const { payload } = await jwtVerify(token, secret, {
+    const { payload } = await jwtVerify(session, encodedKey, {
       algorithms: ["HS256"],
     })
-    return payload as UserSession
+    return payload as User
   } catch (error) {
-    console.error("会话验证失败:", error)
+    console.error("Failed to decrypt session:", error)
     return null
   }
 }
 
-/**
- * 从请求中获取当前会话用户
- */
-export async function getSessionUser(request: Request): Promise<UserSession | null> {
-  const sessionToken = cookies().get("session-token")?.value
-  if (!sessionToken) {
-    return null
-  }
-  return verifySession(sessionToken)
+export async function createSession(user: User) {
+  const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 hours
+  const session = await encrypt({ user, expiresAt })
+
+  cookies().set("session-token", session, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    expires: expiresAt,
+    sameSite: "lax",
+    path: "/",
+  })
 }
 
-/**
- * 删除用户会话
- */
-export async function deleteSession(): Promise<void> {
+export async function deleteSession() {
   cookies().delete("session-token")
 }
 
-/**
- * 根据用户名或邮箱查找用户
- */
-export async function findUserByUsernameOrEmail(identifier: string): Promise<{
-  id: string
-  username: string
-  email: string
-  password_hash: string
-  is_admin: boolean
-  avatar_url: string | null
-} | null> {
-  const [user] = await sql`
-    SELECT id, username, email, password_hash, is_admin, avatar_url
+export async function getSessionUser(): Promise<User | null> {
+  const session = cookies().get("session-token")?.value
+  if (!session) return null
+  return await decrypt(session)
+}
+
+export async function getUserByUsernameOrEmail(identifier: string): Promise<User | null> {
+  const [user] = await sql<User[]>`
+    SELECT id, username, email, password_hash, avatar_url, is_admin, is_verified
     FROM users
     WHERE username = ${identifier} OR email = ${identifier}
     LIMIT 1
@@ -110,39 +70,29 @@ export async function findUserByUsernameOrEmail(identifier: string): Promise<{
   return user ?? null
 }
 
-/**
- * 根据用户 ID 更新头像 URL
- */
-export async function updateUserAvatar(userId: string, avatarUrl: string): Promise<void> {
-  await sql`
+export async function createUser(username: string, email: string, password_hash: string): Promise<User> {
+  const [newUser] = await sql<User[]>`
+    INSERT INTO users (username, email, password_hash, is_admin, is_verified)
+    VALUES (${username}, ${email}, ${password_hash}, FALSE, FALSE)
+    RETURNING id, username, email, avatar_url, is_admin, is_verified
+  `
+  return newUser
+}
+
+export async function updateUserAvatar(userId: number, avatarUrl: string): Promise<User | null> {
+  const [updatedUser] = await sql<User[]>`
     UPDATE users
     SET avatar_url = ${avatarUrl}
     WHERE id = ${userId}
+    RETURNING id, username, email, avatar_url, is_admin, is_verified
   `
+  return updatedUser ?? null
 }
 
-/**
- * 查找用户是否存在（用于注册时的重复校验）
- */
-export async function userExists(username: string, email: string): Promise<boolean> {
-  const [user] = await sql`
-    SELECT id FROM users WHERE username = ${username} OR email = ${email} LIMIT 1
-  `
-  return !!user
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash)
 }
 
-/**
- * 创建新用户
- */
-export async function createUser(
-  username: string,
-  email: string,
-  passwordHash: string,
-): Promise<{ id: string; username: string; email: string; is_admin: boolean } | null> {
-  const [newUser] = await sql`
-    INSERT INTO users (username, email, password_hash, is_admin)
-    VALUES (${username}, ${email}, ${passwordHash}, FALSE)
-    RETURNING id, username, email, is_admin
-  `
-  return newUser ?? null
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10)
 }
