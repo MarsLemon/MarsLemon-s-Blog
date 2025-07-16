@@ -28,6 +28,15 @@ export const locales = [
 export type Locale = (typeof locales)[number]
 
 export default getRequestConfig(async ({ locale }) => {
+  // If the locale is the internal Next.js _not-found path, return empty messages
+  // to prevent the build from crashing during prerendering.
+  if (locale === "_not-found") {
+    return {
+      messages: {},
+    }
+  }
+
+  // For actual locales, proceed as usual
   if (!locales.includes(locale as Locale)) notFound()
 
   return {

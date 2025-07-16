@@ -8,7 +8,7 @@ export default createMiddleware({
 })
 
 export const config = {
-  // Skip API routes, Next.js internals, static files,
-  // and *any* path segment that contains “_not-found”.
-  matcher: ["/((?!api|_next|_vercel|.*_not-found.*|_.*|.*\\..*).*)"],
+  // Skip API routes, Next.js internals, static files, and any path that starts with “_”
+  // The _not-found path is now handled gracefully by i18n/request.ts
+  matcher: ["/((?!api|_next|_vercel|_.*|.*\\..*).*)"],
 }
