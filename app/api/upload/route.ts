@@ -9,7 +9,7 @@ const sql = neon(process.env.DATABASE_URL!)
 export async function POST(request: NextRequest) {
   try {
     // 验证用户身份
-    const token = request.cookies.get("auth-token")?.value
+    const token = request.cookies.get("session-token")?.value
     if (!token) {
       return NextResponse.json({ error: "未授权" }, { status: 401 })
     }
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     // 检查文件是否已存在
     const existingFile = await sql`
-      SELECT id, filename, url, file_type, file_size, uploaded_at
+      SELECT id, filename, file_path, file_type, file_size, created_at
       FROM files 
       WHERE file_hash = ${fileHash}
       LIMIT 1
@@ -69,10 +69,10 @@ export async function POST(request: NextRequest) {
         file: {
           id: existing.id,
           filename: existing.filename,
-          url: existing.url,
+          url: existing.file_path,
           type: existing.file_type,
           size: existing.file_size,
-          uploadedAt: existing.uploaded_at,
+          uploadedAt: existing.created_at,
         },
         message: "文件已存在，使用现有文件",
       })
@@ -98,9 +98,9 @@ export async function POST(request: NextRequest) {
 
     // 保存文件信息到数据库
     const result = await sql`
-      INSERT INTO files (filename, original_name, url, file_type, file_size, file_hash, uploaded_by)
-      VALUES (${filename}, ${file.name}, ${blob.url}, ${file.type}, ${file.size}, ${fileHash}, ${user.id})
-      RETURNING id, filename, url, file_type, file_size, uploaded_at
+      INSERT INTO files (filename, original_name, file_path, file_type, file_size, file_hash, folder)
+      VALUES (${filename}, ${file.name}, ${blob.url}, ${file.type}, ${file.size}, ${fileHash}, ${folder})
+      RETURNING id, filename, file_path, file_type, file_size, created_at
     `
 
     const savedFile = result[0]
@@ -110,10 +110,10 @@ export async function POST(request: NextRequest) {
       file: {
         id: savedFile.id,
         filename: savedFile.filename,
-        url: savedFile.url,
+        url: savedFile.file_path,
         type: savedFile.file_type,
         size: savedFile.file_size,
-        uploadedAt: savedFile.uploaded_at,
+        uploadedAt: savedFile.created_at,
       },
       message: "文件上传成功",
     })
