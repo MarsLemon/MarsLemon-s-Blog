@@ -3,9 +3,20 @@ import { registerUser } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, email, password } = await request.json()
+    console.log("注册API被调用")
+
+    const body = await request.json()
+    console.log("请求体:", body)
+
+    const { username, email, password } = body
+
+    if (!username || !email || !password) {
+      console.log("缺少必需字段")
+      return NextResponse.json({ success: false, message: "所有字段都是必需的" }, { status: 400 })
+    }
 
     const result = await registerUser(username, email, password)
+    console.log("注册结果:", result)
 
     if (result.success) {
       return NextResponse.json({
@@ -26,7 +37,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        message: "服务器错误",
+        message: `服务器错误: ${error}`,
       },
       { status: 500 },
     )
