@@ -55,3 +55,8 @@ export function markdownToHtml(markdown: string): string {
 export function extractExcerpt(content: string, length = 160): string {
   return extractPlainText(content, length)
 }
+
+/** 统一获取全部文章，供前端使用 */
+export async function getPosts(): Promise<Post[]> {
+  return getAllPosts()
+}

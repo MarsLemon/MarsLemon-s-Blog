@@ -172,3 +172,35 @@ export async function getUserById(id: number): Promise<User | null> {
     return null
   }
 }
+
+/**
+ * 根据 sessionToken 获取用户（简化版，移除密码信息）
+ */
+export async function getSessionUser(sessionToken: string): Promise<User | null> {
+  try {
+    const result = await sql`
+      SELECT u.id, u.username, u.email, u.avatar, u.created_at
+      FROM users u
+      JOIN sessions s ON u.id = s.user_id
+      WHERE s.session_token = ${sessionToken} AND s.expires_at > NOW()
+      LIMIT 1
+    `
+    return (result[0] as User) ?? null
+  } catch {
+    return null
+  }
+}
+
+/** 注销登录：删除 session 记录 */
+export async function deleteSession(sessionToken: string): Promise<void> {
+  await sql`DELETE FROM sessions WHERE session_token = ${sessionToken}`
+}
+
+/** 更新用户头像 url */
+export async function updateUserAvatar(userId: number, avatarUrl: string): Promise<void> {
+  await sql`
+    UPDATE users
+    SET avatar = ${avatarUrl}, updated_at = NOW()
+    WHERE id = ${userId}
+  `
+}
