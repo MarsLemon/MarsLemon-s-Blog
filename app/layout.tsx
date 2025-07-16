@@ -22,8 +22,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <UserProvider>
+        <ErrorBoundary>
+          <ThemeProvider>
             <div className="relative min-h-screen flex flex-col">
               <SiteHeader />
               <main className="flex-1">{children}</main>
@@ -47,5 +47,10 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
+}
+
+
+export async function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
 }
