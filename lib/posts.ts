@@ -1,21 +1,20 @@
 import { neon } from "@neondatabase/serverless"
 
 /**
- * 建议：在 Vercel「环境变量」里配置 DATABASE_URL
- * 例如：postgres://user:password@host/db
+ * 在 Vercel 项目或本地 `.env` 中配置：
+ * DATABASE_URL=postgres://user:password@host/db
  */
 if (!process.env.DATABASE_URL) {
-  console.warn("[lib/posts] 缺少 DATABASE_URL 环境变量，所有文章查询将返回空数组。")
+  console.warn("[lib/posts] 缺少 DATABASE_URL，查询将返回空数据")
 }
 
+/* ---------- 数据库客户端 ---------- */
 const sql =
   process.env.DATABASE_URL != null
     ? neon(process.env.DATABASE_URL)
-    : // 若本地未配置数据库，也避免运行时报错
-      ((async () => {
-        throw new Error("DATABASE_URL 未配置")
-      }) as unknown as ReturnType<typeof neon>)
+    : ((async () => []) as unknown as ReturnType<typeof neon>)
 
+/* ---------- 类型声明，与 posts 表字段保持一致 ---------- */
 export interface Post {
   id: number
   title: string
@@ -31,11 +30,10 @@ export interface Post {
   created_at: string
 }
 
-/* ─────────── 查询函数 ─────────── */
+/* ---------- 查询函数 ---------- */
 
-/** 获取全部已发布文章（置顶优先，其次时间倒序） */
+/** 置顶优先、时间倒序的全部已发布文章 */
 export async function getAllPosts(): Promise<Post[]> {
-  if (typeof sql !== "function") return []
   const rows = await sql<Post[]>`
     SELECT *
     FROM posts
@@ -45,9 +43,8 @@ export async function getAllPosts(): Promise<Post[]> {
   return rows
 }
 
-/** 首页最新文章（排除精选） */
+/** 最近文章（排除精选），默认 3 篇 */
 export async function getRecentPosts(limit = 3): Promise<Post[]> {
-  if (typeof sql !== "function") return []
   const rows = await sql<Post[]>`
     SELECT *
     FROM posts
@@ -61,7 +58,6 @@ export async function getRecentPosts(limit = 3): Promise<Post[]> {
 
 /** 最新一篇精选文章 */
 export async function getFeaturedPost(): Promise<Post | null> {
-  if (typeof sql !== "function") return null
   const [post] = await sql<Post[]>`
     SELECT *
     FROM posts
@@ -73,14 +69,8 @@ export async function getFeaturedPost(): Promise<Post | null> {
   return post ?? null
 }
 
-/** 通用别名：getPosts — 若传 limit 则调用 getRecentPosts，否则 getAllPosts */
-export async function getPosts(limit?: number): Promise<Post[]> {
-  return limit != null ? getRecentPosts(limit) : getAllPosts()
-}
-
-/** 根据 slug 获取文章详情 */
+/** 根据 slug 获取单篇文章 */
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  if (typeof sql !== "function") return null
   const [post] = await sql<Post[]>`
     SELECT *
     FROM posts
@@ -89,4 +79,13 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     LIMIT 1
   `
   return post ?? null
+}
+
+/**
+ * 兼容旧代码：getPosts(limit)
+ * - 无 limit → getAllPosts
+ * - 有 limit → getRecentPosts(limit)
+ */
+export async function getPosts(limit?: number): Promise<Post[]> {
+  return typeof limit === "number" ? getRecentPosts(limit) : getAllPosts()
 }
