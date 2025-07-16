@@ -1,28 +1,28 @@
-import Link from "next/link"
-import type React from "react"
-import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/theme-provider"
-import { SiteHeader } from "@/components/site-header"
-import { UserProvider } from "@/lib/user-context"
-import "./globals.css"
+import Link from "next/link";
+import type React from "react";
+import { Inter } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
+import { SiteHeader } from "@/components/site-header";
+import { UserProvider } from "@/lib/user-context";
+import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "DevBlog - Modern Web Development",
   description: "A blog about modern web development, React, Next.js, and more",
-    generator: 'v0.dev'
-}
+  generator: "v0.dev",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ErrorBoundary>
+        <UserProvider>
           <ThemeProvider>
             <div className="relative min-h-screen flex flex-col">
               <SiteHeader />
@@ -33,23 +33,32 @@ export default function RootLayout({
                     © {new Date().getFullYear()} DevBlog. All rights reserved.
                   </p>
                   <div className="flex items-center gap-4">
-                    <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground">
+                    <Link
+                      href="/terms"
+                      className="text-sm text-muted-foreground hover:text-foreground"
+                    >
                       Terms
                     </Link>
-                    <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground">
+                    <Link
+                      href="/privacy"
+                      className="text-sm text-muted-foreground hover:text-foreground"
+                    >
                       Privacy
                     </Link>
                   </div>
                 </div>
               </footer>
             </div>
-          </UserProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </UserProvider>
       </body>
     </html>
   );
 }
 
+// 移除或修复 generateStaticParams
+// 在文件顶部添加 locales 定义
+import { locales } from "@/lib/i18n";
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
