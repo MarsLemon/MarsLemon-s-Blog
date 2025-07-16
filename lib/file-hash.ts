@@ -1,16 +1,8 @@
-import crypto from "crypto"
+import { createHash } from "crypto"
 
-export function generateFileHash(buffer: Buffer): string {
-  return crypto.createHash("sha1").update(buffer).digest("hex")
-}
-
-export function calculateSHA1FromArrayBuffer(arrayBuffer: ArrayBuffer): string {
-  const buffer = Buffer.from(arrayBuffer)
-  return generateFileHash(buffer)
-}
-
-// 客户端使用的文件哈希计算
-export async function calculateFileHash(file: File): Promise<string> {
-  const arrayBuffer = await file.arrayBuffer()
-  return calculateSHA1FromArrayBuffer(arrayBuffer)
+/**
+ * 计算 Buffer 的 SHA-1 哈希（40 位十六进制串）
+ */
+export function sha1(buffer: Buffer): string {
+  return createHash("sha1").update(buffer).digest("hex")
 }

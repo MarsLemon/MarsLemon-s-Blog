@@ -50,7 +50,7 @@
     "embla-carousel-react": "latest",
     "highlight.js": "latest",
     "input-otp": "latest",
-    "jose": "latest",
+    "jsonwebtoken": "latest",
     "lucide-react": "^0.454.0",
     "marked": "latest",
     "marked-highlight": "latest",

@@ -1,32 +1,24 @@
-import { SignJWT, jwtVerify } from "jose"
 import { cookies } from "next/headers"
+import jwt from "jsonwebtoken"
 import { neon } from "@neondatabase/serverless"
 import bcrypt from "bcryptjs"
 
 const sql = neon(process.env.DATABASE_URL!)
 
 // 确保 JWT_SECRET 环境变量已设置，并提供一个安全的默认值用于开发环境
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key-please-change-this-in-production"
-const encodedKey = new TextEncoder().encode(JWT_SECRET)
-
-// 会话过期时间（例如：7 天）
-const EXPIRES_IN_SECONDS = 60 * 60 * 24 * 7
+const JWT_SECRET = process.env.JWT_SECRET || "change-me"
 
 export interface User {
   id: string // 数据库中的 ID 通常是字符串或数字，这里假设为字符串
   username: string
   email: string
-  avatar_url?: string | null
+  avatar_url: string | null
   is_admin: boolean
-  is_verified: boolean
+  created_at: string
 }
 
 export interface UserSessionPayload {
-  id: string
-  username: string
-  email: string
-  is_admin: boolean
-  avatar_url?: string | null
+  uid: string // 使用 uid 作为用户 ID 的标识
   exp: number // JWT expiration time (Unix timestamp)
 }
 
@@ -34,11 +26,7 @@ export interface UserSessionPayload {
  * 创建 JWT Token
  */
 export async function encrypt(payload: UserSessionPayload): Promise<string> {
-  return new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(payload.exp)
-    .sign(encodedKey)
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: payload.exp })
 }
 
 /**
@@ -46,10 +34,7 @@ export async function encrypt(payload: UserSessionPayload): Promise<string> {
  */
 export async function decrypt(session: string | undefined = ""): Promise<UserSessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(session, encodedKey, {
-      algorithms: ["HS256"],
-    })
-    return payload as UserSessionPayload
+    return jwt.verify(session, JWT_SECRET) as UserSessionPayload
   } catch (error) {
     console.error("Failed to decrypt session:", error)
     return null
@@ -60,13 +45,9 @@ export async function decrypt(session: string | undefined = ""): Promise<UserSes
  * 创建用户会话并设置 cookie
  */
 export async function createSession(user: User): Promise<void> {
-  const expires_at = Math.floor(Date.now() / 1000) + EXPIRES_IN_SECONDS // Unix timestamp
+  const expires_at = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // Unix timestamp
   const sessionPayload: UserSessionPayload = {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    is_admin: user.is_admin,
-    avatar_url: user.avatar_url,
+    uid: user.id,
     exp: expires_at,
   }
 
@@ -89,34 +70,23 @@ export async function deleteSession(): Promise<void> {
 }
 
 /**
- * 从 cookie 中获取当前会话用户
+ * 解析 session-token 并从数据库获取用户
  */
 export async function getSessionUser(): Promise<User | null> {
-  const sessionToken = cookies().get("session-token")?.value
-  if (!sessionToken) {
+  const token = cookies().get("session-token")?.value
+  if (!token) return null
+
+  try {
+    const payload = jwt.verify(token, JWT_SECRET) as { uid: string }
+    const [user] = await sql<
+      User[]
+    >`SELECT id, username, email, avatar_url, is_admin, created_at FROM users WHERE id = ${payload.uid} LIMIT 1`
+    return user || null
+  } catch {
+    // token 失效时清理 cookie
+    cookies().delete("session-token")
     return null
   }
-
-  const payload = await decrypt(sessionToken)
-  if (!payload) {
-    deleteSession() // Token无效或过期，清除cookie
-    return null
-  }
-
-  // 重新从数据库获取用户数据，确保最新状态
-  const [userFromDb] = await sql<User[]>`
-    SELECT id, username, email, avatar_url, is_admin, is_verified
-    FROM users
-    WHERE id = ${payload.id}
-    LIMIT 1
-  `
-
-  if (!userFromDb) {
-    deleteSession() // 用户不存在，清除cookie
-    return null
-  }
-
-  return userFromDb
 }
 
 /**
@@ -130,9 +100,10 @@ export async function findUserByUsernameOrEmail(identifier: string): Promise<{
   is_admin: boolean
   is_verified: boolean
   avatar_url: string | null
+  created_at: string
 } | null> {
   const [user] = await sql`
-    SELECT id, username, email, password_hash, is_admin, is_verified, avatar_url
+    SELECT id, username, email, password_hash, is_admin, is_verified, avatar_url, created_at
     FROM users
     WHERE username = ${identifier} OR email = ${identifier}
     LIMIT 1
@@ -159,24 +130,18 @@ export async function hashPassword(password: string): Promise<string> {
  */
 export async function createUser(username: string, email: string, passwordHash: string): Promise<User | null> {
   const [newUser] = await sql<User[]>`
-    INSERT INTO users (username, email, password_hash, is_admin, is_verified)
-    VALUES (${username}, ${email}, ${passwordHash}, FALSE, FALSE)
-    RETURNING id, username, email, avatar_url, is_admin, is_verified
+    INSERT INTO users (username, email, password_hash, is_admin, is_verified, created_at)
+    VALUES (${username}, ${email}, ${passwordHash}, FALSE, FALSE, NOW())
+    RETURNING id, username, email, avatar_url, is_admin, created_at
   `
   return newUser ?? null
 }
 
 /**
- * 根据用户 ID 更新头像 URL
+ * 更新用户头像 URL
  */
-export async function updateUserAvatar(userId: string, avatarUrl: string): Promise<User | null> {
-  const [updatedUser] = await sql<User[]>`
-    UPDATE users
-    SET avatar_url = ${avatarUrl}
-    WHERE id = ${userId}
-    RETURNING id, username, email, avatar_url, is_admin, is_verified
-  `
-  return updatedUser ?? null
+export async function updateUserAvatar(userId: string, url: string): Promise<void> {
+  await sql`UPDATE users SET avatar_url = ${url}, updated_at = NOW() WHERE id = ${userId}`
 }
 
 /**

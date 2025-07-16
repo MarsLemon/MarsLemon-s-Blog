@@ -17,49 +17,38 @@ export default function ProfilePage() {
   const { toast } = useToast()
   const router = useRouter()
 
-  if (loading) {
-    return <p className="flex h-[60vh] justify-center items-center">加载中…</p>
-  }
+  if (loading) return <p className="flex h-[60vh] items-center justify-center">加载中…</p>
   if (!user) {
     router.replace("/admin/login")
     return null
   }
 
-  const handleUpload = async () => {
+  const upload = async () => {
     if (!file) {
       toast({ title: "请选择文件", variant: "destructive" })
       return
     }
-
     setUploading(true)
     const fd = new FormData()
     fd.append("file", file)
 
     try {
       const res = await fetch("/api/upload/avatar", { method: "POST", body: fd })
-      const raw = await res.text() // 先拿文本
+      const json = await res.json().catch(() => ({
+        success: false,
+        message: `非 JSON 响应，状态 ${res.status}`,
+      }))
 
-      let data: any = {}
-      try {
-        data = JSON.parse(raw)
-      } catch {
-        console.error("响应非 JSON:", raw)
-      }
-
-      if (!res.ok || !data.success) {
-        toast({
-          title: "上传失败",
-          description: data.message || "服务器错误",
-          variant: "destructive",
-        })
+      if (!json.success) {
+        toast({ title: "上传失败", description: json.message, variant: "destructive" })
         return
       }
 
       toast({ title: "上传成功" })
       setFile(null)
-      refreshUser() // 更新头像
-    } catch (err) {
-      console.error("头像上传请求失败:", err)
+      refreshUser()
+    } catch (e) {
+      console.error(e)
       toast({ title: "网络或服务器错误", variant: "destructive" })
     } finally {
       setUploading(false)
@@ -67,7 +56,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container max-w-xl py-8">
+    <div className="container mx-auto max-w-xl py-8">
       <Card>
         <CardHeader>
           <CardTitle>个人资料</CardTitle>
@@ -90,7 +79,7 @@ export default function ProfilePage() {
           <div className="space-y-2">
             <Label htmlFor="avatar">更换头像</Label>
             <Input id="avatar" type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-            <Button disabled={uploading || !file} onClick={handleUpload}>
+            <Button disabled={uploading || !file} onClick={upload}>
               {uploading ? "上传中…" : "上传"}
             </Button>
           </div>
