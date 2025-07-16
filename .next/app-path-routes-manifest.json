@@ -1,0 +1,17 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/admin/posts/[id]/route": "/api/admin/posts/[id]",
+  "/api/admin/posts/route": "/api/admin/posts",
+  "/api/auth/login/route": "/api/auth/login",
+  "/api/auth/setup/route": "/api/auth/setup",
+  "/api/auth/logout/route": "/api/auth/logout",
+  "/api/upload/route": "/api/upload",
+  "/admin/login/page": "/admin/login",
+  "/admin/posts/[id]/edit/page": "/admin/posts/[id]/edit",
+  "/admin/posts/new/page": "/admin/posts/new",
+  "/admin/page": "/admin",
+  "/admin/setup/page": "/admin/setup",
+  "/blog/[slug]/page": "/blog/[slug]",
+  "/page": "/",
+  "/blog/page": "/blog"
+}
