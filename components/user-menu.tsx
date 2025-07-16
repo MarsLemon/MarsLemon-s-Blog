@@ -1,82 +1,76 @@
 "use client"
+
 import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { User, LogOut, LogIn, Shield } from "lucide-react"
 import { LoginForm } from "@/components/auth/login-form"
 import { RegisterForm } from "@/components/auth/register-form"
 import { ProfileForm } from "@/components/auth/profile-form"
 import { useUser } from "@/lib/user-context"
-import type { User } from "@/lib/auth"
-import { LogIn, UserPlus, UserIcon, Settings, Shield, LogOut } from "lucide-react"
+import { useI18n } from "@/lib/i18n-context"
+import type { User as UserType } from "@/lib/auth"
+import Link from "next/link"
 
 interface UserMenuProps {
-  user: User | null
+  user: UserType | null
 }
 
 export function UserMenu({ user }: UserMenuProps) {
-  const [showLogin, setShowLogin] = useState(false)
-  const [showRegister, setShowRegister] = useState(false)
-  const [showProfile, setShowProfile] = useState(false)
+  const [showAuthDialog, setShowAuthDialog] = useState(false)
+  const [showProfileDialog, setShowProfileDialog] = useState(false)
+  const [authMode, setAuthMode] = useState<"login" | "register">("login")
   const { logout } = useUser()
-  const router = useRouter()
+  const { t } = useI18n()
 
   const handleLogout = async () => {
     await logout()
-    router.push("/")
+  }
+
+  const handleAuthSuccess = () => {
+    setShowAuthDialog(false)
+  }
+
+  const switchToRegister = () => {
+    setAuthMode("register")
+  }
+
+  const switchToLogin = () => {
+    setAuthMode("login")
   }
 
   if (!user) {
     return (
       <>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setShowLogin(true)}>
-            <LogIn className="mr-2 h-4 w-4" />
-            Login
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowRegister(true)}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Register
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setAuthMode("login")
+            setShowAuthDialog(true)
+          }}
+        >
+          <LogIn className="h-4 w-4 mr-2" />
+          {t("common.login")}
+        </Button>
 
-        <Dialog open={showLogin} onOpenChange={setShowLogin}>
-          <DialogContent>
+        <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Login</DialogTitle>
+              <DialogTitle>{authMode === "login" ? t("auth.loginTitle") : t("auth.registerTitle")}</DialogTitle>
             </DialogHeader>
-            <LoginForm
-              onSuccess={() => setShowLogin(false)}
-              onSwitchToRegister={() => {
-                setShowLogin(false)
-                setShowRegister(true)
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={showRegister} onOpenChange={setShowRegister}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Register</DialogTitle>
-            </DialogHeader>
-            <RegisterForm
-              onSuccess={() => setShowRegister(false)}
-              onSwitchToLogin={() => {
-                setShowRegister(false)
-                setShowLogin(true)
-              }}
-            />
+            {authMode === "login" ? (
+              <LoginForm onSuccess={handleAuthSuccess} onSwitchToRegister={switchToRegister} />
+            ) : (
+              <RegisterForm onSuccess={handleAuthSuccess} onSwitchToLogin={switchToLogin} />
+            )}
           </DialogContent>
         </Dialog>
       </>
@@ -89,49 +83,45 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user.avatar_url || "/placeholder.svg?height=32&width=32"} alt={user.username} />
+              <AvatarImage src={user.avatar_url || undefined} alt={user.username} />
               <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{user.username}</p>
-              <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+          <div className="flex items-center justify-start gap-2 p-2">
+            <div className="flex flex-col space-y-1 leading-none">
+              <p className="font-medium">{user.username}</p>
+              <p className="w-[200px] truncate text-sm text-muted-foreground">{user.email}</p>
             </div>
-          </DropdownMenuLabel>
+          </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setShowProfile(true)}>
-            <UserIcon className="mr-2 h-4 w-4" />
-            Profile
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setShowProfile(true)}>
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
+          <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
+            <User className="mr-2 h-4 w-4" />
+            <span>{t("common.profile")}</span>
           </DropdownMenuItem>
           {user.is_admin && (
             <DropdownMenuItem asChild>
               <Link href="/admin">
                 <Shield className="mr-2 h-4 w-4" />
-                Admin Panel
+                <span>{t("common.admin")}</span>
               </Link>
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
-            Logout
+            <span>{t("common.logout")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={showProfile} onOpenChange={setShowProfile}>
-        <DialogContent>
+      <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Profile Settings</DialogTitle>
+            <DialogTitle>{t("common.profile")}</DialogTitle>
           </DialogHeader>
-          <ProfileForm user={user} onSuccess={() => setShowProfile(false)} />
+          <ProfileForm user={user} onClose={() => setShowProfileDialog(false)} />
         </DialogContent>
       </Dialog>
     </>

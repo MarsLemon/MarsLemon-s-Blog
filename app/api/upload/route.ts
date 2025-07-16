@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 import { verifyAdminToken } from "@/lib/verify-token"
-import { BlobStorage } from "@/lib/blob-storage"
+import { put } from "@vercel/blob"
 import { calculateFileHash, getFileBuffer } from "@/lib/file-hash"
 
 export async function POST(request: NextRequest) {
@@ -38,9 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         file: existing,
-        url: existing.file_path.startsWith("http")
-          ? existing.file_path
-          : `https://your-blob-url.com/${existing.file_path}`,
+        url: existing.file_path,
         duplicate: true,
         message: "File already exists, using existing file",
       })
@@ -58,21 +56,27 @@ export async function POST(request: NextRequest) {
       folder = "documents"
     }
 
+    // Generate unique filename
+    const timestamp = Date.now()
+    const extension = originalName.split(".").pop()
+    const filename = `${folder}/${timestamp}-${Math.random().toString(36).substring(2)}.${extension}`
+
     // Upload to Vercel Blob
-    const blobStorage = new BlobStorage()
-    const { url, path } = await blobStorage.uploadFile(file, folder)
+    const blob = await put(filename, file, {
+      access: "public",
+    })
 
     // Store file info in database with hash
     const result = await sql`
       INSERT INTO files (filename, original_name, file_path, file_type, file_size, folder, file_hash)
-      VALUES (${path.split("/").pop()}, ${originalName}, ${url}, ${fileType}, ${fileSize}, ${folder}, ${fileHash})
+      VALUES (${filename}, ${originalName}, ${blob.url}, ${fileType}, ${fileSize}, ${folder}, ${fileHash})
       RETURNING *
     `
 
     return NextResponse.json({
       success: true,
       file: result[0],
-      url: url,
+      url: blob.url,
       duplicate: false,
     })
   } catch (error) {

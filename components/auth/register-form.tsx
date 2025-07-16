@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useUser } from "@/lib/user-context"
+import { useI18n } from "@/lib/i18n-context"
 
 interface RegisterFormProps {
   onSuccess: () => void
@@ -17,50 +18,29 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const { register } = useUser()
+  const { t } = useI18n()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setSuccess("")
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match")
-      return
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters")
-      return
-    }
-
     setLoading(true)
 
     try {
       await register(username, email, password)
-      setSuccess("Account created successfully! You can now log in.")
+      setSuccess(t("auth.accountCreated"))
+      setTimeout(() => {
+        onSwitchToLogin()
+      }, 2000)
     } catch (error: any) {
-      setError(error.message || "Registration failed")
+      setError(error.message || t("auth.registerFailed"))
     } finally {
       setLoading(false)
     }
-  }
-
-  if (success) {
-    return (
-      <div className="space-y-4">
-        <Alert>
-          <AlertDescription>{success}</AlertDescription>
-        </Alert>
-        <Button onClick={onSwitchToLogin} className="w-full">
-          Go to Login
-        </Button>
-      </div>
-    )
   }
 
   return (
@@ -71,62 +51,54 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
         </Alert>
       )}
 
+      {success && (
+        <Alert>
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-2">
-        <Label htmlFor="username">Username</Label>
+        <Label htmlFor="username">{t("auth.username")}</Label>
         <Input
           id="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="Enter your username"
+          placeholder={t("auth.username")}
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t("auth.email")}</Label>
         <Input
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your email"
+          placeholder={t("auth.email")}
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t("auth.password")}</Label>
         <Input
           id="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter your password"
+          placeholder={t("auth.password")}
           required
-          minLength={6}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm Password</Label>
-        <Input
-          id="confirmPassword"
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm your password"
-          required
-          minLength={6}
         />
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Creating account..." : "Register"}
+        {loading ? `${t("auth.registerTitle")}...` : t("auth.registerTitle")}
       </Button>
 
       <div className="text-center">
         <Button type="button" variant="link" onClick={onSwitchToLogin}>
-          Already have an account? Login
+          {t("auth.alreadyHaveAccount")}
         </Button>
       </div>
     </form>

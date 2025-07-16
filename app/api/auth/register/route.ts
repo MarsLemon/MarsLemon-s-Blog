@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createUser, getUserByEmail, getUserByUsername } from "@/lib/auth"
-import { sql } from "@/lib/db"
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,10 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user
-    const user = await createUser(username, email, password)
-
-    // Auto-verify for demo purposes
-    await sql`UPDATE users SET is_verified = true WHERE id = ${user.id}`
+    await createUser(username, email, password)
 
     return NextResponse.json({
       success: true,

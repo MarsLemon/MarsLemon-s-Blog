@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useUser } from "@/lib/user-context"
-import { useTranslations } from "next-intl"
+import { useI18n } from "@/lib/i18n-context"
 
 interface LoginFormProps {
   onSuccess: () => void
@@ -20,7 +20,7 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const { login } = useUser()
-  const t = useTranslations("auth")
+  const { t } = useI18n()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,7 +31,7 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
       await login(emailOrUsername, password)
       onSuccess()
     } catch (error: any) {
-      setError(error.message || t("loginFailed"))
+      setError(error.message || t("auth.loginFailed"))
     } finally {
       setLoading(false)
     }
@@ -46,35 +46,35 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="emailOrUsername">{t("emailOrUsername")}</Label>
+        <Label htmlFor="emailOrUsername">{t("auth.emailOrUsername")}</Label>
         <Input
           id="emailOrUsername"
           value={emailOrUsername}
           onChange={(e) => setEmailOrUsername(e.target.value)}
-          placeholder={t("emailOrUsername")}
+          placeholder={t("auth.emailOrUsername")}
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">{t("password")}</Label>
+        <Label htmlFor="password">{t("auth.password")}</Label>
         <Input
           id="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder={t("password")}
+          placeholder={t("auth.password")}
           required
         />
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? `${t("login")}...` : t("login")}
+        {loading ? `${t("auth.loginTitle")}...` : t("auth.loginTitle")}
       </Button>
 
       <div className="text-center">
         <Button type="button" variant="link" onClick={onSwitchToRegister}>
-          {t("dontHaveAccount")}
+          {t("auth.dontHaveAccount")}
         </Button>
       </div>
     </form>
