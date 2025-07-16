@@ -18,7 +18,7 @@ export default async function BlogPost({ params }: { params: { slug: string } })
     <div className="container mx-auto px-4 py-8">
       <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-8">
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to home
+        返回首页
       </Link>
 
       <article className="max-w-3xl mx-auto">
@@ -28,11 +28,6 @@ export default async function BlogPost({ params }: { params: { slug: string } })
           {new Date(post.created_at).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" })}
           {post.author_name && ` by ${post.author_name}`}
         </div>
-        <div
-          className="prose prose-gray dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: htmlContent }}
-        />
-
         {post.cover_image && (
           <div className="relative h-[400px] w-full mb-8">
             <Image
@@ -44,9 +39,13 @@ export default async function BlogPost({ params }: { params: { slug: string } })
             />
           </div>
         )}
+        <div
+          className="prose prose-gray dark:prose-invert max-w-none"
+          dangerouslySetInnerHTML={{ __html: htmlContent }}
+        />
 
         <div className="border-t mt-12 pt-8">
-          <h3 className="text-lg font-bold mb-4">Share this post</h3>
+          <h3 className="text-lg font-bold mb-4">分享此文章</h3>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">
               Twitter

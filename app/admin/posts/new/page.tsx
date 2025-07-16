@@ -29,6 +29,7 @@ export default function NewPostPage() {
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">创建新文章</h1>
+      <p className="text-muted-foreground">创建一篇新的博客文章</p>
       <PostEditor onSave={handleSave} />
     </div>
   )

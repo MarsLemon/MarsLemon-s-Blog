@@ -90,3 +90,28 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 export async function getPosts(limit?: number): Promise<Post[]> {
   return typeof limit === "number" ? getRecentPosts(limit) : getAllPosts()
 }
+
+// 辅助函数：生成 slug
+export function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "") // 移除特殊字符
+    .replace(/\s+/g, "-") // 空格替换为连字符
+    .replace(/-+/g, "-") // 多个连字符替换为单个
+    .trim() // 去除首尾空格
+}
+
+// 辅助函数：将 Markdown 转换为 HTML
+import { marked } from "marked"
+import DOMPurify from "isomorphic-dompurify"
+
+export function markdownToHtml(markdown: string): string {
+  const html = marked.parse(markdown)
+  return DOMPurify.sanitize(html as string)
+}
+
+// 辅助函数：提取纯文本摘要
+export function extractExcerpt(content: string, length = 160): string {
+  const plainText = content.replace(/<\/?[^>]+(>|$)/g, "") // 移除 HTML 标签
+  return plainText.substring(0, length) + (plainText.length > length ? "..." : "")
+}

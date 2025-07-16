@@ -1,30 +1,35 @@
 "use client"
 
-import { useEffect } from "react"
-
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { notFound } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter, notFound } from "next/navigation"
 import { getPostBySlug } from "@/lib/posts"
 import { PostEditor } from "@/components/admin/post-editor"
-import type { Post } from "@/lib/db"
+import type { Post } from "@/lib/db" // Assuming Post type is also in lib/db
 
-export default async function EditPostPage({ params }: { params: { id: string } }) {
+export default function EditPostPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [post, setPost] = useState<Post | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Assuming 'id' here is actually the slug for fetching
-  const fetchedPost = await getPostBySlug(params.id)
-
   useEffect(() => {
-    if (fetchedPost) {
-      setPost(fetchedPost)
-      setLoading(false)
-    } else {
-      notFound()
+    const fetchPost = async () => {
+      try {
+        // Assuming params.id is the slug for fetching the post
+        const fetchedPost = await getPostBySlug(params.id)
+        if (fetchedPost) {
+          setPost(fetchedPost)
+        } else {
+          notFound() // If post not found, trigger Next.js notFound
+        }
+      } catch (error) {
+        console.error("Failed to fetch post:", error)
+        notFound() // Handle error by showing not found page
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [fetchedPost])
+    fetchPost()
+  }, [params.id]) // Depend on params.id to refetch if slug changes
 
   const handleSave = async (postData: any) => {
     try {
@@ -50,7 +55,7 @@ export default async function EditPostPage({ params }: { params: { id: string } 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div>Loading...</div>
+        <div>加载中...</div>
       </div>
     )
   }
@@ -58,7 +63,7 @@ export default async function EditPostPage({ params }: { params: { id: string } 
   if (!post) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div>Post not found</div>
+        <div>文章未找到</div>
       </div>
     )
   }
@@ -68,7 +73,7 @@ export default async function EditPostPage({ params }: { params: { id: string } 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">编辑文章</h1>
-          {/* <p className="text-muted-foreground">Edit your blog post</p> */}
+          <p className="text-muted-foreground">编辑您的博客文章</p>
         </div>
 
         <PostEditor post={post} onSave={handleSave} />

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { verifyToken } from "@/lib/verify-token"
 import { neon } from "@neondatabase/serverless"
-import { generateSlug } from "@/lib/posts" // Assuming generateSlug is in lib/posts
+import { generateSlug } from "@/lib/posts" // 确保这里导入 generateSlug
 
 const sql = neon(process.env.DATABASE_URL!)
 
@@ -36,7 +36,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ message: "标题和内容不能为空" }, { status: 400 })
     }
 
-    const slug = generateSlug(title)
+    const slug = generateSlug(title) // 使用从 lib/posts 导入的 generateSlug
 
     const [updatedPost] = await sql`
       UPDATE posts
