@@ -35,3 +35,13 @@ export default getRequestConfig(async ({ locale }) => {
     messages: (await import(`../messages/${locale}.json`)).default,
   }
 })
+
+
+export async function getStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
+
+// Add this to handle not-found page localization
+export async function generateStaticParams() {
+  return getStaticParams();
+}
