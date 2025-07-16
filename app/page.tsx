@@ -3,12 +3,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FeaturedPost } from "@/components/featured-post"
 import { PostCard } from "@/components/post-card"
-import { getPosts } from "@/lib/posts"
+import { getFeaturedPost, getRecentPosts } from "@/lib/posts"
 
 export default async function HomePage() {
-  const posts = await getPosts()
-  const featuredPost = posts.find((post) => post.featured)
-  const recentPosts = posts.filter((post) => !post.featured).slice(0, 6)
+  const featuredPost = await getFeaturedPost()
+  const recentPosts = await getRecentPosts()
 
   return (
     <div className="container py-8">
