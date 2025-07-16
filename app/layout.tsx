@@ -5,13 +5,13 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SiteHeader } from "@/components/site-header"
 import { Toaster } from "@/components/ui/toaster"
-import { UserProvider } from "@/lib/user-context"
+import { UserProvider } from "@/lib/user-context" // 确保导入 UserProvider
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "我的博客",
-  description: "一个基于 Next.js 和 Tailwind CSS 构建的个人博客。",
+  description: "一个由 Vercel AI 驱动的博客模板",
     generator: 'v0.dev'
 }
 

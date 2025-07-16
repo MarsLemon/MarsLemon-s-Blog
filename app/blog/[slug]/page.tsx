@@ -1,52 +1,44 @@
-import { getPostBySlug, markdownToHtml } from "@/lib/posts"
 import { notFound } from "next/navigation"
+import { getPostBySlug, markdownToHtml } from "@/lib/posts"
 import Image from "next/image"
 
-export default async function PostPage({ params }: { params: { slug: string } }) {
+export const revalidate = 60 // Revalidate every 60 seconds
+
+interface PostPageProps {
+  params: {
+    slug: string
+  }
+}
+
+export default async function PostPage({ params }: PostPageProps) {
   const post = await getPostBySlug(params.slug)
 
   if (!post) {
     notFound()
   }
 
-  const contentHtml = markdownToHtml(post.content)
+  const contentHtml = await markdownToHtml(post.content || "")
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <article className="max-w-3xl mx-auto">
+    <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8 max-w-3xl">
+      <article className="prose prose-lg dark:prose-invert mx-auto">
         {post.cover_image && (
-          <div className="mb-8">
+          <div className="relative w-full h-64 mb-8 rounded-lg overflow-hidden">
             <Image
               src={post.cover_image || "/placeholder.svg"}
               alt={post.title}
-              width={1200}
-              height={600}
-              className="w-full h-auto rounded-lg object-cover"
-              priority
+              fill
+              style={{ objectFit: "cover" }}
+              className="rounded-lg"
             />
           </div>
         )}
         <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-        <div className="flex items-center text-muted-foreground text-sm mb-8">
-          {post.author_avatar && (
-            <Image
-              src={post.author_avatar || "/placeholder.svg"}
-              alt={post.author_name || "作者"}
-              width={32}
-              height={32}
-              className="rounded-full mr-2"
-            />
-          )}
-          <span>{post.author_name || "匿名作者"}</span>
-          <span className="mx-2">·</span>
-          <span>
-            {new Date(post.created_at).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" })}
-          </span>
+        <div className="text-muted-foreground text-sm mb-8">
+          发布于{" "}
+          {new Date(post.created_at).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" })}
         </div>
-        <div
-          className="prose prose-lg dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: contentHtml }}
-        />
+        <div dangerouslySetInnerHTML={{ __html: contentHtml }} />
       </article>
     </div>
   )

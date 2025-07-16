@@ -1,25 +1,19 @@
-import { getAllPosts } from "@/lib/posts"
-import Link from "next/link"
+import { getPosts } from "@/lib/posts"
+import { PostCard } from "@/components/post-card"
 
-export default async function Blog() {
-  const posts = await getAllPosts()
+export const revalidate = 60 // Revalidate every 60 seconds
+
+export default async function BlogPage() {
+  const posts = await getPosts()
 
   return (
-    <main className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-5">博客</h1>
-      {posts.length > 0 ? (
-        <ul>
-          {posts.map((post) => (
-            <li key={post.slug} className="mb-3">
-              <Link href={`/blog/${post.slug}`} className="text-blue-500 hover:underline">
-                {post.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-muted-foreground">暂无文章发布。</p>
-      )}
-    </main>
+    <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
+      <h1 className="text-4xl font-bold tracking-tight mb-8">所有文章</h1>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} />
+        ))}
+      </div>
+    </div>
   )
 }

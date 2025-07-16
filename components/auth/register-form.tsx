@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
@@ -9,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { useUser } from "@/lib/user-context"
+import { useUser } from "@/lib/user-context" // 确保导入 useUser
 
 export default function RegisterForm() {
   const [username, setUsername] = useState("")
@@ -18,7 +17,7 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const { refreshUser } = useUser()
+  const { refreshUser } = useUser() // 使用 useUser 提供的 refreshUser
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,14 +37,14 @@ export default function RegisterForm() {
       if (response.ok) {
         toast({
           title: "注册成功",
-          description: "您已成功注册并登录。",
+          description: "您的账户已创建并自动登录。",
         })
         refreshUser() // 刷新用户上下文
-        router.push("/") // 注册成功后跳转到首页
+        router.push("/admin") // 注册成功后跳转到管理后台
       } else {
         toast({
           title: "注册失败",
-          description: data.message || "注册失败，请检查您的输入。",
+          description: data.message || "注册过程中发生错误。",
           variant: "destructive",
         })
       }
@@ -96,7 +95,7 @@ export default function RegisterForm() {
             <Input
               id="password"
               type="password"
-              placeholder="请输入密码"
+              placeholder="请输入密码 (至少6个字符)"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -110,7 +109,7 @@ export default function RegisterForm() {
       <CardFooter className="text-center text-sm text-muted-foreground">
         <p>
           已有账户？
-          <a className="underline" href="/login">
+          <a className="underline" href="/admin/login">
             登录
           </a>
         </p>

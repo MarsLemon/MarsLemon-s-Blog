@@ -6,28 +6,28 @@ const sql = neon(process.env.DATABASE_URL!)
 
 export async function GET() {
   try {
-    const username = "Mars"
-    const email = "mars@example.com"
-    const password = "Mars9807130015" // 默认密码
-
-    // 检查管理员用户是否已存在
-    const [existingUser] = await sql`
-      SELECT id FROM users WHERE username = ${username} OR email = ${email} LIMIT 1
+    // 检查是否已有管理员
+    const [adminExists] = await sql`
+      SELECT id FROM users WHERE is_admin = TRUE LIMIT 1
     `
 
-    if (existingUser) {
-      return NextResponse.json({ message: "管理员账户已存在" }, { status: 200 })
+    if (adminExists) {
+      return NextResponse.json({ message: "管理员账户已存在，无需初始化" }, { status: 200 })
     }
 
-    // 哈希密码
-    const passwordHash = await bcrypt.hash(password, 10)
+    // 创建管理员账户
+    const username = "Mars"
+    const email = "mars@example.com"
+    const password = "Mars9807130015"
+    const hashedPassword = await bcrypt.hash(password, 10)
 
-    // 创建管理员用户
     await sql`
       INSERT INTO users (username, email, password_hash, is_admin, is_verified)
-      VALUES (${username}, ${email}, ${passwordHash}, TRUE, TRUE)
+      VALUES (${username}, ${email}, ${hashedPassword}, TRUE, TRUE)
+      ON CONFLICT (email) DO NOTHING
     `
 
+    console.log("管理员账户已创建: Mars / Mars9807130015")
     return NextResponse.json({ message: "管理员账户初始化成功" }, { status: 201 })
   } catch (error) {
     console.error("初始化管理员账户失败:", error)

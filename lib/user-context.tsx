@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import type { User } from "@/lib/auth"
+import type { User } from "@/lib/auth" // 确保导入正确的 User 类型
 
 interface UserContextType {
   user: User | null
@@ -21,9 +21,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const response = await fetch("/api/auth/me")
       if (response.ok) {
         const data = await response.json()
-        setUser(data.user)
+        if (data.success) {
+          setUser(data.user)
+        } else {
+          setUser(null) // API返回未登录
+        }
       } else {
-        setUser(null)
+        setUser(null) // HTTP错误
       }
     } catch (error) {
       console.error("获取用户会话失败:", error)

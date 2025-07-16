@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getUserByUsernameOrEmail, verifyPassword, createSession } from "@/lib/auth"
+import { findUserByUsernameOrEmail, verifyPassword, createSession } from "@/lib/auth"
 
 export async function POST(request: Request) {
   try {
@@ -9,23 +9,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "用户名/邮箱和密码是必填项" }, { status: 400 })
     }
 
-    const user = await getUserByUsernameOrEmail(identifier)
+    const user = await findUserByUsernameOrEmail(identifier)
 
     if (!user) {
       console.log(`登录失败: 用户 ${identifier} 不存在`)
       return NextResponse.json({ message: "用户名或密码不正确" }, { status: 401 })
     }
 
-    // 假设 user 对象中包含 password_hash 字段
-    const isPasswordValid = await verifyPassword(password, (user as any).password_hash)
+    const isPasswordValid = await verifyPassword(password, user.password_hash)
 
     if (!isPasswordValid) {
       console.log(`登录失败: 用户 ${identifier} 密码不正确`)
       return NextResponse.json({ message: "用户名或密码不正确" }, { status: 401 })
     }
 
-    // 移除敏感信息
-    const userWithoutHash = {
+    // 移除敏感信息，确保 User 接口匹配
+    const userForSession = {
       id: user.id,
       username: user.username,
       email: user.email,
@@ -34,9 +33,9 @@ export async function POST(request: Request) {
       is_verified: user.is_verified,
     }
 
-    await createSession(userWithoutHash)
+    await createSession(userForSession)
 
-    return NextResponse.json({ message: "登录成功", user: userWithoutHash }, { status: 200 })
+    return NextResponse.json({ message: "登录成功", user: userForSession }, { status: 200 })
   } catch (error) {
     console.error("登录失败:", error)
     return NextResponse.json({ message: "服务器错误，登录失败" }, { status: 500 })

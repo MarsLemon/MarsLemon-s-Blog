@@ -1,32 +1,29 @@
 import { NextResponse } from "next/server"
 import { put } from "@vercel/blob"
-import { verifyToken } from "@/lib/auth"
-import { getFileHash } from "@/lib/file-hash"
-import { neon } from "@neondatabase/serverless"
-
-const sql = neon(process.env.DATABASE_URL!)
+import { getSessionUser } from "@/lib/auth"
+import { generateFileHash } from "@/lib/file-hash"
+import { sql } from "@/lib/db" // 确保 db.ts 存在并导出 sql 实例
 
 export async function POST(request: Request) {
+  const user = await getSessionUser()
+  if (!user || !user.is_admin) {
+    return NextResponse.json({ message: "未授权" }, { status: 401 })
+  }
+
+  const formData = await request.formData()
+  const file = formData.get("file") as File
+
+  if (!file) {
+    return NextResponse.json({ message: "未找到文件" }, { status: 400 })
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    return NextResponse.json({ message: "文件大小不能超过 10MB" }, { status: 400 })
+  }
+
   try {
-    const user = await verifyToken(request)
-    if (!user || !user.is_admin) {
-      return NextResponse.json({ message: "未授权" }, { status: 401 })
-    }
-
-    const formData = await request.formData()
-    const file = formData.get("file") as File
-
-    if (!file) {
-      return NextResponse.json({ message: "未找到文件" }, { status: 400 })
-    }
-
-    // 限制文件大小，例如 10MB
-    if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ message: "文件大小不能超过 10MB" }, { status: 400 })
-    }
-
     const fileBuffer = Buffer.from(await file.arrayBuffer())
-    const fileHash = getFileHash(fileBuffer)
+    const fileHash = generateFileHash(fileBuffer)
 
     // 检查文件是否已存在
     const [existingFile] = await sql`
@@ -36,7 +33,7 @@ export async function POST(request: Request) {
     let fileUrl: string
     if (existingFile) {
       fileUrl = existingFile.url
-      console.log(`文件已存在，使用现有文件: ${fileUrl}`)
+      console.log("文件已存在，使用现有URL:", fileUrl)
     } else {
       // 上传到 Vercel Blob
       const blob = await put(`uploads/${file.name}`, file, {
@@ -50,7 +47,7 @@ export async function POST(request: Request) {
         INSERT INTO files (name, type, size, hash, url)
         VALUES (${file.name}, ${file.type}, ${file.size}, ${fileHash}, ${fileUrl})
       `
-      console.log(`文件上传成功: ${fileUrl}`)
+      console.log("文件上传成功，新URL:", fileUrl)
     }
 
     return NextResponse.json({ message: "文件上传成功", url: fileUrl }, { status: 200 })

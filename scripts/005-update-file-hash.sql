@@ -1,6 +1,6 @@
 -- 添加 files 表用于存储文件信息，支持 SHA1 哈希去重
 CREATE TABLE IF NOT EXISTS files (
-  id SERIAL PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
   type VARCHAR(100) NOT NULL,
   size BIGINT NOT NULL,
@@ -97,3 +97,10 @@ BEGIN
         ALTER TABLE posts ADD COLUMN is_pinned BOOLEAN DEFAULT FALSE;
     END IF;
 END $$;
+
+-- 添加索引到 files 表的 hash 列以加快查找速度
+CREATE INDEX IF NOT EXISTS idx_files_hash ON files (hash);
+
+-- 可选：如果需要在 posts 或 users 中存储文件 ID，可以添加类似以下的列：
+-- ALTER TABLE posts ADD COLUMN cover_image_file_id UUID REFERENCES files(id);
+-- ALTER TABLE users ADD COLUMN avatar_file_id UUID REFERENCES files(id);

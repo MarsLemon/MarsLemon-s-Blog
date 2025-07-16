@@ -1,12 +1,12 @@
 import crypto from "crypto"
 
-export function getFileHash(buffer: Buffer): string {
+export function generateFileHash(buffer: Buffer): string {
   return crypto.createHash("sha1").update(buffer).digest("hex")
 }
 
 export function calculateSHA1FromArrayBuffer(arrayBuffer: ArrayBuffer): string {
   const buffer = Buffer.from(arrayBuffer)
-  return getFileHash(buffer)
+  return generateFileHash(buffer)
 }
 
 // 客户端使用的文件哈希计算
