@@ -1,20 +1,21 @@
 import { neon } from "@neondatabase/serverless"
 
 /**
- * 在 Vercel 项目或本地 `.env` 中配置：
- * DATABASE_URL=postgres://user:password@host/db
+ * DATABASE_URL 请在 Vercel 环境变量或本地 .env 中配置
+ * 例如：postgres://user:password@host:5432/db
  */
 if (!process.env.DATABASE_URL) {
-  console.warn("[lib/posts] 缺少 DATABASE_URL，查询将返回空数据")
+  console.warn("[lib/posts] 缺少 DATABASE_URL，查询将返回空数组")
 }
 
 /* ---------- 数据库客户端 ---------- */
 const sql =
   process.env.DATABASE_URL != null
     ? neon(process.env.DATABASE_URL)
-    : ((async () => []) as unknown as ReturnType<typeof neon>)
+    : // 缺少连接信息时返回空结果，避免编译期报错
+      ((async () => []) as unknown as ReturnType<typeof neon>)
 
-/* ---------- 类型声明，与 posts 表字段保持一致 ---------- */
+/* ---------- 类型，与 posts 表字段一致 ---------- */
 export interface Post {
   id: number
   title: string
@@ -32,7 +33,7 @@ export interface Post {
 
 /* ---------- 查询函数 ---------- */
 
-/** 置顶优先、时间倒序的全部已发布文章 */
+/** 全部已发布文章：置顶优先、时间倒序 */
 export async function getAllPosts(): Promise<Post[]> {
   const rows = await sql<Post[]>`
     SELECT *
@@ -43,7 +44,7 @@ export async function getAllPosts(): Promise<Post[]> {
   return rows
 }
 
-/** 最近文章（排除精选），默认 3 篇 */
+/** 最新文章（排除精选），默认取 3 篇 */
 export async function getRecentPosts(limit = 3): Promise<Post[]> {
   const rows = await sql<Post[]>`
     SELECT *
@@ -83,8 +84,8 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
 /**
  * 兼容旧代码：getPosts(limit)
- * - 无 limit → getAllPosts
- * - 有 limit → getRecentPosts(limit)
+ * limit 为空 → getAllPosts
+ * limit 有值 → getRecentPosts(limit)
  */
 export async function getPosts(limit?: number): Promise<Post[]> {
   return typeof limit === "number" ? getRecentPosts(limit) : getAllPosts()
