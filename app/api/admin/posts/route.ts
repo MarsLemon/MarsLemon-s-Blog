@@ -1,50 +1,49 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { sql } from "@/lib/db"
-import { generateSlug, extractExcerpt } from "@/lib/posts"
-import { verifyAdminToken } from "@/lib/verify-token"
+import { NextResponse } from "next/server"
+import { verifyToken } from "@/lib/verify-token"
+import { neon } from "@neondatabase/serverless"
+import { generateSlug } from "@/lib/posts" // Assuming generateSlug is in lib/posts
 
-export async function GET() {
+const sql = neon(process.env.DATABASE_URL!)
+
+export async function GET(request: Request) {
   try {
-    const posts = await sql`
-      SELECT * FROM posts 
-      ORDER BY is_pinned DESC, created_at DESC
-    `
+    const user = await verifyToken(request)
+    if (!user || !user.is_admin) {
+      return NextResponse.json({ message: "未授权" }, { status: 401 })
+    }
+
+    const posts = await sql`SELECT * FROM posts ORDER BY created_at DESC`
     return NextResponse.json(posts)
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 })
+    console.error("获取文章列表失败:", error)
+    return NextResponse.json({ message: "获取文章列表失败" }, { status: 500 })
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const isValid = await verifyAdminToken(request)
-    if (!isValid) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const user = await verifyToken(request)
+    if (!user || !user.is_admin) {
+      return NextResponse.json({ message: "未授权" }, { status: 401 })
     }
 
-    const { title, content, cover_image, is_featured, is_pinned } = await request.json()
+    const { title, content, excerpt, cover_image, published, is_featured, is_pinned } = await request.json()
 
     if (!title || !content) {
-      return NextResponse.json({ error: "Title and content are required" }, { status: 400 })
+      return NextResponse.json({ message: "标题和内容不能为空" }, { status: 400 })
     }
 
     const slug = generateSlug(title)
-    const excerpt = extractExcerpt(content)
 
-    // Check if slug already exists
-    const existingPost = await sql`SELECT id FROM posts WHERE slug = ${slug}`
-    if (existingPost.length > 0) {
-      return NextResponse.json({ error: "A post with this title already exists" }, { status: 400 })
-    }
-
-    const result = await sql`
-      INSERT INTO posts (title, slug, excerpt, content, cover_image, is_featured, is_pinned)
-      VALUES (${title}, ${slug}, ${excerpt}, ${content}, ${cover_image || null}, ${is_featured || false}, ${is_pinned || false})
+    const [newPost] = await sql`
+      INSERT INTO posts (title, content, excerpt, cover_image, published, is_featured, is_pinned, slug, created_at, updated_at)
+      VALUES (${title}, ${content}, ${excerpt}, ${cover_image}, ${published}, ${is_featured}, ${is_pinned}, ${slug}, NOW(), NOW())
       RETURNING *
     `
 
-    return NextResponse.json(result[0])
+    return NextResponse.json(newPost, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: "Failed to create post" }, { status: 500 })
+    console.error("创建文章失败:", error)
+    return NextResponse.json({ message: "创建文章失败" }, { status: 500 })
   }
 }

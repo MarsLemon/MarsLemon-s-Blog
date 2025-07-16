@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation"
 import { PostEditor } from "@/components/admin/post-editor"
 
-export default function NewPost() {
+export default function NewPostPage() {
   const router = useRouter()
 
   const handleSave = async (postData: any) => {
@@ -27,15 +27,9 @@ export default function NewPost() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">New Post</h1>
-          <p className="text-muted-foreground">Create a new blog post</p>
-        </div>
-
-        <PostEditor onSave={handleSave} />
-      </div>
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">创建新文章</h1>
+      <PostEditor onSave={handleSave} />
     </div>
   )
 }

@@ -1,42 +1,30 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
+
+import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { notFound } from "next/navigation"
+import { getPostBySlug } from "@/lib/posts"
 import { PostEditor } from "@/components/admin/post-editor"
 import type { Post } from "@/lib/db"
 
-export default function EditPost({ params }: { params: { id: string } }) {
+export default async function EditPostPage({ params }: { params: { id: string } }) {
+  const router = useRouter()
   const [post, setPost] = useState<Post | null>(null)
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
+
+  // Assuming 'id' here is actually the slug for fetching
+  const fetchedPost = await getPostBySlug(params.id)
 
   useEffect(() => {
-    fetchPost()
-  }, [])
-
-  const fetchPost = async () => {
-    try {
-      const response = await fetch(`/api/admin/posts`)
-      if (response.status === 401) {
-        router.push("/admin/login")
-        return
-      }
-
-      const posts = await response.json()
-      const currentPost = posts.find((p: Post) => p.id === Number.parseInt(params.id))
-
-      if (currentPost) {
-        setPost(currentPost)
-      } else {
-        router.push("/admin")
-      }
-    } catch (error) {
-      console.error("Failed to fetch post:", error)
-      router.push("/admin")
-    } finally {
+    if (fetchedPost) {
+      setPost(fetchedPost)
       setLoading(false)
+    } else {
+      notFound()
     }
-  }
+  }, [fetchedPost])
 
   const handleSave = async (postData: any) => {
     try {
@@ -79,8 +67,8 @@ export default function EditPost({ params }: { params: { id: string } }) {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Edit Post</h1>
-          <p className="text-muted-foreground">Edit your blog post</p>
+          <h1 className="text-3xl font-bold">编辑文章</h1>
+          {/* <p className="text-muted-foreground">Edit your blog post</p> */}
         </div>
 
         <PostEditor post={post} onSave={handleSave} />

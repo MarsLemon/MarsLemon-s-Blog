@@ -2,8 +2,7 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { CalendarIcon, ArrowLeft } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ArrowLeft } from "lucide-react"
 import { getPostBySlug, markdownToHtml } from "@/lib/posts"
 
 export default async function BlogPost({ params }: { params: { slug: string } }) {
@@ -23,29 +22,16 @@ export default async function BlogPost({ params }: { params: { slug: string } })
       </Link>
 
       <article className="max-w-3xl mx-auto">
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <CalendarIcon className="mr-1 h-3 w-3" />
-              {new Date(post.created_at).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </div>
-          </div>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">{post.title}</h1>
-          <div className="flex items-center gap-3 mb-8">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={post.author_avatar || "/placeholder.svg"} alt={post.author_name} />
-              <AvatarFallback>{post.author_name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="font-medium">{post.author_name}</div>
-              <div className="text-sm text-muted-foreground">{post.author_bio}</div>
-            </div>
-          </div>
+        <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
+        <div className="text-muted-foreground text-sm mb-6">
+          发布于{" "}
+          {new Date(post.created_at).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" })}
+          {post.author_name && ` by ${post.author_name}`}
         </div>
+        <div
+          className="prose prose-gray dark:prose-invert max-w-none"
+          dangerouslySetInnerHTML={{ __html: htmlContent }}
+        />
 
         {post.cover_image && (
           <div className="relative h-[400px] w-full mb-8">
@@ -58,11 +44,6 @@ export default async function BlogPost({ params }: { params: { slug: string } })
             />
           </div>
         )}
-
-        <div
-          className="prose prose-gray dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: htmlContent }}
-        />
 
         <div className="border-t mt-12 pt-8">
           <h3 className="text-lg font-bold mb-4">Share this post</h3>

@@ -1,67 +1,86 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { sql } from "@/lib/db"
-import { generateSlug, extractExcerpt } from "@/lib/posts"
-import { verifyAdminToken } from "@/lib/verify-token"
+import { NextResponse } from "next/server"
+import { verifyToken } from "@/lib/verify-token"
+import { neon } from "@neondatabase/serverless"
+import { generateSlug } from "@/lib/posts" // Assuming generateSlug is in lib/posts
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+const sql = neon(process.env.DATABASE_URL!)
+
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    const isValid = await verifyAdminToken(request)
-    if (!isValid) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const user = await verifyToken(request)
+    if (!user || !user.is_admin) {
+      return NextResponse.json({ message: "未授权" }, { status: 401 })
     }
 
-    const { title, content, cover_image, is_featured, is_pinned } = await request.json()
-    const id = Number.parseInt(params.id)
-
-    if (!title || !content) {
-      return NextResponse.json({ error: "Title and content are required" }, { status: 400 })
+    const [post] = await sql`SELECT * FROM posts WHERE id = ${params.id}`
+    if (!post) {
+      return NextResponse.json({ message: "文章未找到" }, { status: 404 })
     }
-
-    const slug = generateSlug(title)
-    const excerpt = extractExcerpt(content)
-
-    // Check if slug already exists for other posts
-    const existingPost = await sql`SELECT id FROM posts WHERE slug = ${slug} AND id != ${id}`
-    if (existingPost.length > 0) {
-      return NextResponse.json({ error: "A post with this title already exists" }, { status: 400 })
-    }
-
-    const result = await sql`
-      UPDATE posts 
-      SET title = ${title}, slug = ${slug}, excerpt = ${excerpt}, content = ${content}, 
-          cover_image = ${cover_image || null}, is_featured = ${is_featured || false}, 
-          is_pinned = ${is_pinned || false}, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ${id}
-      RETURNING *
-    `
-
-    if (result.length === 0) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 })
-    }
-
-    return NextResponse.json(result[0])
+    return NextResponse.json(post)
   } catch (error) {
-    return NextResponse.json({ error: "Failed to update post" }, { status: 500 })
+    console.error("获取文章详情失败:", error)
+    return NextResponse.json({ message: "获取文章详情失败" }, { status: 500 })
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-    const isValid = await verifyAdminToken(request)
-    if (!isValid) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const user = await verifyToken(request)
+    if (!user || !user.is_admin) {
+      return NextResponse.json({ message: "未授权" }, { status: 401 })
     }
 
-    const id = Number.parseInt(params.id)
+    const { title, content, excerpt, cover_image, published, is_featured, is_pinned } = await request.json()
 
-    const result = await sql`DELETE FROM posts WHERE id = ${id} RETURNING *`
-
-    if (result.length === 0) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 })
+    if (!title || !content) {
+      return NextResponse.json({ message: "标题和内容不能为空" }, { status: 400 })
     }
 
-    return NextResponse.json({ success: true })
+    const slug = generateSlug(title)
+
+    const [updatedPost] = await sql`
+      UPDATE posts
+      SET
+        title = ${title},
+        content = ${content},
+        excerpt = ${excerpt},
+        cover_image = ${cover_image},
+        published = ${published},
+        is_featured = ${is_featured},
+        is_pinned = ${is_pinned},
+        slug = ${slug},
+        updated_at = NOW()
+      WHERE id = ${params.id}
+      RETURNING *
+    `
+
+    if (!updatedPost) {
+      return NextResponse.json({ message: "文章更新失败" }, { status: 404 })
+    }
+
+    return NextResponse.json(updatedPost)
   } catch (error) {
-    return NextResponse.json({ error: "Failed to delete post" }, { status: 500 })
+    console.error("更新文章失败:", error)
+    return NextResponse.json({ message: "更新文章失败" }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  try {
+    const user = await verifyToken(request)
+    if (!user || !user.is_admin) {
+      return NextResponse.json({ message: "未授权" }, { status: 401 })
+    }
+
+    const result = await sql`DELETE FROM posts WHERE id = ${params.id}`
+
+    if (result.count === 0) {
+      return NextResponse.json({ message: "文章未找到" }, { status: 404 })
+    }
+
+    return NextResponse.json({ message: "文章删除成功" })
+  } catch (error) {
+    console.error("删除文章失败:", error)
+    return NextResponse.json({ message: "删除文章失败" }, { status: 500 })
   }
 }
