@@ -1,16 +1,16 @@
 import crypto from "crypto"
 
-export function calculateFileHash(buffer: ArrayBuffer): string {
-  const hash = crypto.createHash("sha1")
-  hash.update(new Uint8Array(buffer))
-  return hash.digest("hex")
+export function calculateSHA1(buffer: Buffer): string {
+  return crypto.createHash("sha1").update(buffer).digest("hex")
 }
 
-export async function getFileBuffer(file: File): Promise<ArrayBuffer> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as ArrayBuffer)
-    reader.onerror = reject
-    reader.readAsArrayBuffer(file)
-  })
+export function calculateSHA1FromArrayBuffer(arrayBuffer: ArrayBuffer): string {
+  const buffer = Buffer.from(arrayBuffer)
+  return calculateSHA1(buffer)
+}
+
+// 客户端使用的文件哈希计算
+export async function calculateFileHash(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer()
+  return calculateSHA1FromArrayBuffer(arrayBuffer)
 }

@@ -1,12 +1,9 @@
--- 确保文件表有SHA1哈希字段
+-- 添加文件哈希字段到files表
 ALTER TABLE files ADD COLUMN IF NOT EXISTS file_hash VARCHAR(40);
 
--- 创建哈希索引以提高查询性能
+-- 为file_hash字段创建索引以提高查询性能
 CREATE INDEX IF NOT EXISTS idx_files_hash ON files(file_hash);
 
--- 为现有文件生成随机哈希（实际应用中应该重新计算）
-UPDATE files SET file_hash = md5(random()::text) WHERE file_hash IS NULL;
-
--- 确保用户表支持用户名或邮箱登录
-ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50) UNIQUE;
-UPDATE users SET username = split_part(email, '@', 1) WHERE username IS NULL;
+-- 更新现有文件的哈希值（如果需要的话）
+-- 注意：这个操作可能需要重新计算现有文件的哈希值
+-- UPDATE files SET file_hash = 'placeholder' WHERE file_hash IS NULL;

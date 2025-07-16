@@ -1,81 +1,95 @@
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FeaturedPost } from "@/components/featured-post"
 import { PostCard } from "@/components/post-card"
-import { Button } from "@/components/ui/button"
-import { getFeaturedPost, getRecentPosts } from "@/lib/posts"
+import { getPosts } from "@/lib/posts"
 
-export default async function Home() {
-  const featuredPost = await getFeaturedPost()
-  const recentPosts = await getRecentPosts(3)
+export default async function HomePage() {
+  const posts = await getPosts()
+  const featuredPost = posts.find((post) => post.featured)
+  const recentPosts = posts.filter((post) => !post.featured).slice(0, 6)
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {featuredPost && (
-        <section className="mb-16">
-          <FeaturedPost
-            post={{
-              title: featuredPost.title,
-              excerpt: featuredPost.excerpt || "",
-              date: new Date(featuredPost.created_at).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              }),
-              author: {
-                name: featuredPost.author_name,
-                avatar: featuredPost.author_avatar,
-              },
-              coverImage: featuredPost.cover_image || "/placeholder.svg?height=600&width=1200",
-              slug: featuredPost.slug,
-            }}
-          />
-        </section>
-      )}
-
-      <section className="mb-16">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold">Recent Posts</h2>
-          <Link href="/blog">
-            <Button variant="outline">View All</Button>
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {recentPosts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={{
-                id: post.id.toString(),
-                title: post.title,
-                excerpt: post.excerpt || "",
-                date: new Date(post.created_at).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                }),
-                author: {
-                  name: post.author_name,
-                  avatar: post.author_avatar,
-                },
-                coverImage: post.cover_image || "/placeholder.svg?height=400&width=600",
-                slug: post.slug,
-              }}
-            />
-          ))}
+    <div className="container py-8">
+      {/* Hero Section */}
+      <section className="text-center py-12 md:py-20">
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">欢迎来到开发博客</h1>
+        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          探索现代Web开发的最新技术、最佳实践和深度见解。从React到Next.js，从设计到部署。
+        </p>
+        <div className="flex gap-4 justify-center">
+          <Button asChild size="lg">
+            <Link href="/blog">浏览文章</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link href="/about">了解更多</Link>
+          </Button>
         </div>
       </section>
 
-      <section className="mb-16">
-        <div className="bg-muted rounded-lg p-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Subscribe to our newsletter</h2>
-          <p className="text-muted-foreground mb-6">Get the latest posts delivered right to your inbox</p>
-          <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            />
-            <Button>Subscribe</Button>
+      {/* Featured Post */}
+      {featuredPost && (
+        <section className="mb-12">
+          <h2 className="text-3xl font-bold mb-6">精选文章</h2>
+          <FeaturedPost post={featuredPost} />
+        </section>
+      )}
+
+      {/* Recent Posts */}
+      <section>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold">最新文章</h2>
+          <Button asChild variant="outline">
+            <Link href="/blog">查看全部</Link>
+          </Button>
+        </div>
+
+        {recentPosts.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {recentPosts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
           </div>
+        ) : (
+          <Card>
+            <CardContent className="text-center py-12">
+              <p className="text-muted-foreground">暂无文章发布</p>
+            </CardContent>
+          </Card>
+        )}
+      </section>
+
+      {/* Features Section */}
+      <section className="py-12 mt-12">
+        <h2 className="text-3xl font-bold text-center mb-12">为什么选择我们？</h2>
+        <div className="grid gap-8 md:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>深度技术分析</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>深入探讨前端技术栈，从基础概念到高级应用，帮助开发者提升技能。</CardDescription>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>实战项目经验</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>分享真实项目开发经验，包括架构设计、性能优化和最佳实践。</CardDescription>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>持续更新内容</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>紧跟技术发展趋势，定期更新最新的开发工具和框架使用指南。</CardDescription>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </div>

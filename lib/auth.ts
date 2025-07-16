@@ -1,165 +1,174 @@
+import { neon } from "@neondatabase/serverless"
 import bcrypt from "bcryptjs"
-import { sql } from "./db"
-import crypto from "crypto"
+import jwt from "jsonwebtoken"
+
+const sql = neon(process.env.DATABASE_URL!)
 
 export interface User {
   id: number
   username: string
   email: string
-  avatar_url: string | null
-  is_admin: boolean
-  is_verified: boolean
+  avatar?: string
   created_at: string
 }
 
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 12)
+export interface AuthResult {
+  success: boolean
+  user?: User
+  token?: string
+  message?: string
 }
 
-export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  return bcrypt.compare(password, hashedPassword)
+// 验证用户名格式
+export function validateUsername(username: string): boolean {
+  const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/
+  return usernameRegex.test(username)
 }
 
-export async function createUser(username: string, email: string, password: string): Promise<User> {
-  const hashedPassword = await hashPassword(password)
-  const verificationToken = crypto.randomBytes(32).toString("hex")
-
-  const result = await sql`
-    INSERT INTO users (username, email, password_hash, verification_token, is_verified)
-    VALUES (${username}, ${email}, ${hashedPassword}, ${verificationToken}, true)
-    RETURNING id, username, email, avatar_url, is_admin, is_verified, created_at
-  `
-
-  return result[0] as User
+// 验证邮箱格式
+export function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
 }
 
-export async function verifyUser(emailOrUsername: string, password: string): Promise<User | null> {
-  // 支持邮箱或用户名登录
-  const result = await sql`
-    SELECT id, username, email, password_hash, avatar_url, is_admin, is_verified, created_at
-    FROM users
-    WHERE (email = ${emailOrUsername} OR username = ${emailOrUsername}) AND is_verified = true
-  `
+// 注册用户
+export async function registerUser(username: string, email: string, password: string): Promise<AuthResult> {
+  try {
+    // 验证输入
+    if (!username || !email || !password) {
+      return { success: false, message: "所有字段都是必需的" }
+    }
 
-  if (result.length === 0) return null
+    if (!validateUsername(username)) {
+      return { success: false, message: "用户名必须是3-20个字符，只能包含字母、数字和下划线" }
+    }
 
-  const user = result[0]
-  const isValid = await verifyPassword(password, user.password_hash)
+    if (!validateEmail(email)) {
+      return { success: false, message: "邮箱格式无效" }
+    }
 
-  if (!isValid) return null
+    if (password.length < 6) {
+      return { success: false, message: "密码至少需要6个字符" }
+    }
 
-  return {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    avatar_url: user.avatar_url,
-    is_admin: user.is_admin,
-    is_verified: user.is_verified,
-    created_at: user.created_at,
+    // 检查用户名是否已存在
+    const existingUsername = await sql`
+      SELECT id FROM users WHERE username = ${username}
+    `
+    if (existingUsername.length > 0) {
+      return { success: false, message: "用户名已存在" }
+    }
+
+    // 检查邮箱是否已存在
+    const existingEmail = await sql`
+      SELECT id FROM users WHERE email = ${email}
+    `
+    if (existingEmail.length > 0) {
+      return { success: false, message: "邮箱已存在" }
+    }
+
+    // 加密密码
+    const hashedPassword = await bcrypt.hash(password, 12)
+
+    // 创建用户
+    const result = await sql`
+      INSERT INTO users (username, email, password_hash)
+      VALUES (${username}, ${email}, ${hashedPassword})
+      RETURNING id, username, email, avatar, created_at
+    `
+
+    const user = result[0] as User
+
+    return { success: true, user, message: "账户创建成功" }
+  } catch (error) {
+    console.error("注册错误:", error)
+    return { success: false, message: "注册失败" }
   }
 }
 
+// 用户登录（支持用户名或邮箱）
+export async function loginUser(emailOrUsername: string, password: string): Promise<AuthResult> {
+  try {
+    if (!emailOrUsername || !password) {
+      return { success: false, message: "所有字段都是必需的" }
+    }
+
+    // 检查是邮箱还是用户名
+    const isEmail = validateEmail(emailOrUsername)
+
+    let user
+    if (isEmail) {
+      const result = await sql`
+        SELECT id, username, email, password_hash, avatar, created_at
+        FROM users 
+        WHERE email = ${emailOrUsername}
+      `
+      user = result[0]
+    } else {
+      const result = await sql`
+        SELECT id, username, email, password_hash, avatar, created_at
+        FROM users 
+        WHERE username = ${emailOrUsername}
+      `
+      user = result[0]
+    }
+
+    if (!user) {
+      return { success: false, message: "凭据无效" }
+    }
+
+    // 验证密码
+    const isValidPassword = await bcrypt.compare(password, user.password_hash)
+    if (!isValidPassword) {
+      return { success: false, message: "凭据无效" }
+    }
+
+    // 生成JWT token
+    const token = jwt.sign({ userId: user.id, username: user.username }, process.env.JWT_SECRET!, { expiresIn: "7d" })
+
+    // 移除密码哈希
+    const { password_hash, ...userWithoutPassword } = user
+
+    return {
+      success: true,
+      user: userWithoutPassword as User,
+      token,
+      message: "登录成功",
+    }
+  } catch (error) {
+    console.error("登录错误:", error)
+    return { success: false, message: "登录失败" }
+  }
+}
+
+// 验证token
+export async function verifyToken(token: string): Promise<User | null> {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: number }
+
+    const result = await sql`
+      SELECT id, username, email, avatar, created_at
+      FROM users 
+      WHERE id = ${decoded.userId}
+    `
+
+    return (result[0] as User) || null
+  } catch (error) {
+    return null
+  }
+}
+
+// 获取用户信息
 export async function getUserById(id: number): Promise<User | null> {
-  const result = await sql`
-    SELECT id, username, email, avatar_url, is_admin, is_verified, created_at
-    FROM users
-    WHERE id = ${id}
-  `
+  try {
+    const result = await sql`
+      SELECT id, username, email, avatar, created_at
+      FROM users 
+      WHERE id = ${id}
+    `
 
-  return result.length > 0 ? (result[0] as User) : null
-}
-
-export async function getUserByEmail(email: string): Promise<User | null> {
-  const result = await sql`
-    SELECT id, username, email, avatar_url, is_admin, is_verified, created_at
-    FROM users
-    WHERE email = ${email}
-  `
-
-  return result.length > 0 ? (result[0] as User) : null
-}
-
-export async function getUserByUsername(username: string): Promise<User | null> {
-  const result = await sql`
-    SELECT id, username, email, avatar_url, is_admin, is_verified, created_at
-    FROM users
-    WHERE username = ${username}
-  `
-
-  return result.length > 0 ? (result[0] as User) : null
-}
-
-export async function createSession(userId: number): Promise<string> {
-  const sessionToken = crypto.randomBytes(32).toString("hex")
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
-
-  await sql`
-    INSERT INTO sessions (user_id, session_token, expires_at)
-    VALUES (${userId}, ${sessionToken}, ${expiresAt})
-  `
-
-  return sessionToken
-}
-
-export async function getSessionUser(sessionToken: string): Promise<User | null> {
-  const result = await sql`
-    SELECT u.id, u.username, u.email, u.avatar_url, u.is_admin, u.is_verified, u.created_at
-    FROM users u
-    JOIN sessions s ON u.id = s.user_id
-    WHERE s.session_token = ${sessionToken} AND s.expires_at > NOW()
-  `
-
-  return result.length > 0 ? (result[0] as User) : null
-}
-
-export async function deleteSession(sessionToken: string): Promise<void> {
-  await sql`DELETE FROM sessions WHERE session_token = ${sessionToken}`
-}
-
-export async function verifyEmailToken(token: string): Promise<boolean> {
-  const result = await sql`
-    UPDATE users
-    SET is_verified = true, verification_token = NULL
-    WHERE verification_token = ${token}
-    RETURNING id
-  `
-
-  return result.length > 0
-}
-
-export async function updateUserAvatar(userId: number, avatarUrl: string): Promise<void> {
-  await sql`
-    UPDATE users
-    SET avatar_url = ${avatarUrl}, updated_at = CURRENT_TIMESTAMP
-    WHERE id = ${userId}
-  `
-}
-
-/**
- * Check if at least one admin account exists.
- */
-export async function checkAdminExists(): Promise<boolean> {
-  const result = await sql`SELECT COUNT(*) AS count FROM users WHERE is_admin = true`
-  return Number(result[0].count) > 0
-}
-
-/**
- * Programmatically create an admin account.
- * If a user with the same username/email already exists it will be ignored.
- */
-export async function createAdmin(username: string, email: string, password: string): Promise<void> {
-  const hashed = await hashPassword(password)
-  await sql`
-    INSERT INTO users (username, email, password_hash, is_admin, is_verified)
-    VALUES (${username}, ${email}, ${hashed}, true, true)
-    ON CONFLICT (email) DO NOTHING
-  `
-}
-
-// 初始化管理员账户
-export async function initializeAdmin(): Promise<void> {
-  const adminExists = await checkAdminExists()
-  if (!adminExists) {
-    await createAdmin("Mars", "mars@example.com", "Mars9807130015")
+    return (result[0] as User) || null
+  } catch (error) {
+    return null
   }
 }
