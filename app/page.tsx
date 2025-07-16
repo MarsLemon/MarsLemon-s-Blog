@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FeaturedPost } from "@/components/featured-post"
 import { PostCard } from "@/components/post-card"
-import { getFeaturedPost, getRecentPosts } from "@/lib/posts"
+import { getFeaturedPost, getRecentPosts } from "@/lib/posts.ts"
 
 export default async function HomePage() {
   const featuredPost = await getFeaturedPost()
