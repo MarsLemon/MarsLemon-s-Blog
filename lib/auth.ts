@@ -54,7 +54,7 @@ export async function createSession(userId: number, username: string, email: str
 }
 
 export async function deleteSession() {
-  cookies().delete("session-token")
+  (await cookies()).delete("session-token")
 }
 
 export async function getSessionUser(): Promise<User | null> {
