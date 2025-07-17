@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   title: "开发博客 - 现代Web开发",
   description: "关于现代Web开发、React、Next.js等技术的博客",
   generator: "v0.dev",
+  icon: '/favicon.ico',
 }
 
 export default function RootLayout({
@@ -23,9 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-      </head>
+     
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <UserProvider>
