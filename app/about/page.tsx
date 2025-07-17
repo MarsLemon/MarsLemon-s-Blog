@@ -1,82 +1,109 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Github, Mail, Globe } from "lucide-react"
 
 export default function AboutPage() {
+  const technologies = ["Next.js", "React", "TypeScript", "Tailwind CSS", "Node.js", "PostgreSQL", "Vercel", "Git"]
+
+  const features = [
+    {
+      title: "现代化技术栈",
+      description: "使用最新的Web技术构建，确保最佳的性能和用户体验",
+    },
+    {
+      title: "响应式设计",
+      description: "完美适配各种设备，无论是桌面端还是移动端",
+    },
+    {
+      title: "SEO优化",
+      description: "针对搜索引擎优化，让您的内容更容易被发现",
+    },
+    {
+      title: "安全可靠",
+      description: "采用现代安全实践，保护用户数据和隐私",
+    },
+  ]
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
+        {/* 页面头部 */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">关于我们</h1>
-          <p className="text-xl text-muted-foreground">欢迎来到我们的技术博客，这里分享最新的开发经验和技术见解</p>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            一个专注于现代Web开发技术的博客平台，分享最新的技术趋势和开发经验
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          <Card>
-            <CardHeader>
-              <CardTitle>我们的使命</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                致力于分享高质量的技术内容，帮助开发者提升技能，推动技术社区的发展。
-                我们相信知识分享的力量，通过博客文章、教程和经验分享， 为广大开发者提供有价值的学习资源。
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>技术栈</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary">Next.js</Badge>
-                <Badge variant="secondary">React</Badge>
-                <Badge variant="secondary">TypeScript</Badge>
-                <Badge variant="secondary">Tailwind CSS</Badge>
-                <Badge variant="secondary">PostgreSQL</Badge>
-                <Badge variant="secondary">Vercel</Badge>
-                <Badge variant="secondary">Node.js</Badge>
-                <Badge variant="secondary">Prisma</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="mb-12">
+        {/* 项目介绍 */}
+        <Card className="mb-8">
           <CardHeader>
-            <CardTitle>团队成员</CardTitle>
-            <CardDescription>认识我们的核心团队</CardDescription>
+            <CardTitle>项目简介</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="text-center">
-                <Avatar className="w-20 h-20 mx-auto mb-4">
-                  <AvatarImage src="/placeholder-user.jpg" alt="Mars" />
-                  <AvatarFallback>M</AvatarFallback>
-                </Avatar>
-                <h3 className="font-semibold">Mars</h3>
-                <p className="text-sm text-muted-foreground">创始人 & 全栈开发</p>
-                <p className="text-xs text-muted-foreground mt-2">专注于现代Web开发技术，热爱开源项目</p>
-              </div>
+            <p className="text-muted-foreground mb-4">
+              这是一个基于Next.js构建的现代化博客平台，旨在为开发者提供一个分享技术文章、交流开发经验的平台。
+              我们专注于前端技术、后端开发、DevOps等领域的内容分享。
+            </p>
+            <p className="text-muted-foreground">
+              平台支持用户注册、文章发布、评论互动等功能，采用响应式设计，确保在各种设备上都有良好的用户体验。
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* 技术栈 */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>技术栈</CardTitle>
+            <CardDescription>本项目使用的主要技术和工具</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {technologies.map((tech) => (
+                <Badge key={tech} variant="secondary">
+                  {tech}
+                </Badge>
+              ))}
             </div>
           </CardContent>
         </Card>
 
+        {/* 特性介绍 */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-6">平台特性</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {features.map((feature, index) => (
+              <Card key={index}>
+                <CardHeader>
+                  <CardTitle className="text-lg">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* 联系信息 */}
         <Card>
           <CardHeader>
             <CardTitle>联系我们</CardTitle>
-            <CardDescription>有任何问题或建议，欢迎与我们联系</CardDescription>
+            <CardDescription>如果您有任何问题或建议，欢迎联系我们</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold mb-2">邮箱</h4>
-                <p className="text-muted-foreground">mars@example.com</p>
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-center space-x-3">
+                <Mail className="h-5 w-5 text-muted-foreground" />
+                <span>support@example.com</span>
               </div>
-              <div>
-                <h4 className="font-semibold mb-2">GitHub</h4>
-                <p className="text-muted-foreground">github.com/marslemon</p>
+              <div className="flex items-center space-x-3">
+                <Github className="h-5 w-5 text-muted-foreground" />
+                <span>github.com/example/blog</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Globe className="h-5 w-5 text-muted-foreground" />
+                <span>www.example.com</span>
               </div>
             </div>
           </CardContent>

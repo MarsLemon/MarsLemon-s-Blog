@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
 import { UserMenu } from "@/components/user-menu"
 import { useUser } from "@/lib/user-context"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function SiteHeader() {
   const pathname = usePathname()
@@ -40,24 +41,22 @@ export function SiteHeader() {
         </div>
 
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="w-full flex-1 md:w-auto md:flex-none">{/* 搜索框可以后续添加 */}</div>
+          <div className="w-full flex-1 md:w-auto md:flex-none"></div>
           <nav className="flex items-center space-x-2">
             <ModeToggle />
-            {!loading && (
-              <>
-                {user ? (
-                  <UserMenu user={user} />
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href="/login">登录</Link>
-                    </Button>
-                    <Button size="sm" asChild>
-                      <Link href="/register">注册</Link>
-                    </Button>
-                  </div>
-                )}
-              </>
+            {loading ? (
+              <Skeleton className="h-8 w-8 rounded-full" />
+            ) : user ? (
+              <UserMenu user={user} />
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/login">登录</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href="/register">注册</Link>
+                </Button>
+              </div>
             )}
           </nav>
         </div>

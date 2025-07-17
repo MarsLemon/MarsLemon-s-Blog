@@ -12,47 +12,24 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { useUser } from "@/lib/user-context"
 import { useRouter } from "next/navigation"
-import { useToast } from "@/components/ui/use-toast"
 import Link from "next/link"
+import { User, Settings, Shield, LogOut, PlusCircle } from "lucide-react"
 
-export function UserMenu() {
-  const { user, refreshUser } = useUser()
+interface UserMenuProps {
+  user: any
+}
+
+export function UserMenu({ user }: UserMenuProps) {
+  const { logout } = useUser()
   const router = useRouter()
-  const { toast } = useToast()
 
   const handleLogout = async () => {
-    try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-      })
-
-      if (response.ok) {
-        toast({
-          title: "登出成功",
-          description: "您已成功登出。",
-        })
-        refreshUser() // 刷新用户上下文
-        router.push("/")
-      } else {
-        const data = await response.json()
-        toast({
-          title: "登出失败",
-          description: data.message || "登出失败，请稍后再试。",
-          variant: "destructive",
-        })
-      }
-    } catch (error) {
-      console.error("登出请求失败:", error)
-      toast({
-        title: "错误",
-        description: "网络或服务器错误，请稍后再试。",
-        variant: "destructive",
-      })
-    }
+    await logout()
+    router.push("/")
   }
 
   if (!user) {
-    return null // 如果没有用户，不显示菜单
+    return null
   }
 
   return (
@@ -74,18 +51,39 @@ export function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/profile">个人资料</Link>
+          <Link href="/profile" className="flex items-center">
+            <User className="mr-2 h-4 w-4" />
+            个人资料
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/settings">设置</Link>
+          <Link href="/settings" className="flex items-center">
+            <Settings className="mr-2 h-4 w-4" />
+            设置
+          </Link>
         </DropdownMenuItem>
         {user.is_admin && (
-          <DropdownMenuItem asChild>
-            <Link href="/admin">管理后台</Link>
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/admin" className="flex items-center">
+                <Shield className="mr-2 h-4 w-4" />
+                管理后台
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/admin/posts/new" className="flex items-center">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                新建博客
+              </Link>
+            </DropdownMenuItem>
+          </>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>登出</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout} className="flex items-center">
+          <LogOut className="mr-2 h-4 w-4" />
+          登出
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
