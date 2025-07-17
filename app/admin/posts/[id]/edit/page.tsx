@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { PostEditor } from "@/components/admin/post-editor"
 import { getPostById } from "@/lib/posts"
 import { redirect } from "next/navigation"
+import {env} from "@/lib/env"
 
 interface EditPostPageProps {
   params: {
@@ -23,10 +24,11 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
   }
 
   const handleSave = async (postData: any) => {
+    "use server"
 
     try {
       const response = await fetch(
-        `/api/admin/posts/${postId}`,
+        `${env.NEXT_PUBLIC_BASE_URL}/api/admin/posts/${postId}`,
         {
           method: "PUT",
           headers: {
