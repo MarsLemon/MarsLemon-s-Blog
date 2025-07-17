@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
-       <Head>
+      <Head>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <body className={inter.className}>
