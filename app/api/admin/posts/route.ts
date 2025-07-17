@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 import { verifyToken } from "@/lib/verify-token"
 import { generateSlug, extractExcerpt } from "@/lib/posts"
+import {env} from "@/lib/env"
 
 const sql = neon(process.env.DATABASE_URL!)
 
