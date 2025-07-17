@@ -11,7 +11,7 @@ interface EditPostPageProps {
 }
 
 export default async function EditPostPage({ params }: EditPostPageProps) {
-  const postId = Number.parseInt(params.id)
+  const postId = Number.parseInt(await( params).id)
 
   if (isNaN(postId)) {
     notFound()

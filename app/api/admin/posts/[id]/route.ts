@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ message: "需要管理员权限" }, { status: 403 })
     }
 
-    const postId = Number.parseInt(params.id)
+    const postId = Number.parseInt(await( params).id)
     if (isNaN(postId)) {
       return NextResponse.json({ message: "无效的文章ID" }, { status: 400 })
     }
@@ -45,7 +45,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ message: "需要管理员权限" }, { status: 403 })
     }
 
-    const postId = Number.parseInt(params.id)
+    const postId = Number.parseInt(await( params).id)
     if (isNaN(postId)) {
       return NextResponse.json({ message: "无效的文章ID" }, { status: 400 })
     }
