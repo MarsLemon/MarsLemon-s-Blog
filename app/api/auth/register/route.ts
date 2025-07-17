@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getUserByUsernameOrEmail, createUser, hashPassword, createSession } from "@/lib/auth"
+import { findUserByUsernameOrEmail, registerUser, hashPassword, createSession } from "@/lib/auth"
 
 export async function POST(request: Request) {
   try {
@@ -10,17 +10,17 @@ export async function POST(request: Request) {
     }
 
     // 检查用户名或邮箱是否已存在
-    const existingUser = await getUserByUsernameOrEmail(username)
+    const existingUser = await findUserByUsernameOrEmail(username)
     if (existingUser) {
       return NextResponse.json({ message: "用户名或邮箱已存在" }, { status: 409 })
     }
-    const existingEmail = await getUserByUsernameOrEmail(email)
+    const existingEmail = await findUserByUsernameOrEmail(email)
     if (existingEmail) {
       return NextResponse.json({ message: "用户名或邮箱已存在" }, { status: 409 })
     }
 
     const passwordHash = await hashPassword(password)
-    const newUser = await createUser(username, email, passwordHash)
+    const newUser = await registerUser(username, email, passwordHash)
 
     // 注册成功后自动登录
     await createSession(newUser)
