@@ -1,84 +1,106 @@
 import { getAllPosts } from "@/lib/posts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CalendarDays, User } from "lucide-react"
-import Link from "next/link"
 
 export default async function BlogPage() {
-  let posts = []
+  const posts = await getAllPosts()
 
-  try {
-    console.log("开始获取博客列表")
-    posts = await getAllPosts()
-    console.log("博客列表获取成功:", posts.length)
-  } catch (error) {
-    console.error("获取博客列表错误:", error)
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto">
+        {/* 页面头部 */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">博客文章</h1>
-          <p className="text-muted-foreground text-lg">分享技术见解与生活感悟</p>
+          <h1 className="text-4xl font-bold mb-4">技术博客</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            探索最新的技术趋势，分享开发经验，与开发者社区一起成长
+          </p>
         </div>
 
+        {/* 文章列表 */}
         {posts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {posts.map((post) => (
-              <Card
-                key={post.id}
-                className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-              >
-                {post.cover_image && (
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={post.cover_image || "/placeholder.svg"}
-                      alt={post.title}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-black/10" />
-                    <div className="absolute top-2 right-2 flex gap-1">
-                      {post.is_pinned && <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white">置顶</Badge>}
-                      {post.is_featured && <Badge className="bg-red-500 hover:bg-red-600 text-white">精选</Badge>}
+              <Card key={post.id} className="group hover:shadow-lg transition-shadow duration-300">
+                <div className="relative">
+                  {post.cover_image && (
+                    <div className="aspect-video overflow-hidden rounded-t-lg">
+                      <img
+                        src={post.cover_image || "/placeholder.svg"}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
-                  </div>
-                )}
+                  )}
+                  {post.is_pinned && (
+                    <Badge className="absolute top-2 right-2" variant="destructive">
+                      置顶
+                    </Badge>
+                  )}
+                  {post.is_featured && (
+                    <Badge className="absolute top-2 left-2" variant="default">
+                      精选
+                    </Badge>
+                  )}
+                </div>
+
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg line-clamp-2">
-                    <Link href={`/blog/${post.slug}`} className="hover:text-blue-600 transition-colors">
-                      {post.title}
-                    </Link>
+                  <CardTitle className="line-clamp-2 group-hover:text-blue-600 transition-colors">
+                    <Link href={`/blog/${post.slug}`}>{post.title}</Link>
                   </CardTitle>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Avatar className="h-5 w-5">
-                      <AvatarImage src={post.author_avatar || ""} />
-                      <AvatarFallback>
-                        <User className="h-3 w-3" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <span>{post.author_name || "匿名"}</span>
-                    <span>•</span>
-                    <div className="flex items-center gap-1">
-                      <CalendarDays className="h-3 w-3" />
-                      <span>{new Date(post.created_at).toLocaleDateString("zh-CN")}</span>
+                  <CardDescription className="line-clamp-3">{post.excerpt}</CardDescription>
+                </CardHeader>
+
+                <CardContent className="pt-0">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center space-x-2">
+                      <Avatar className="w-6 h-6">
+                        <AvatarImage src={post.author_avatar || "/placeholder-user.jpg"} />
+                        <AvatarFallback>{post.author_name.charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <span>{post.author_name}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <CalendarDays className="w-4 h-4" />
+                      <span>{formatDate(post.created_at)}</span>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-sm text-muted-foreground line-clamp-3">{post.excerpt}</p>
+
+                  <div className="mt-4">
+                    <Link href={`/blog/${post.slug}`} className="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                      阅读更多 →
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
+          <div className="text-center py-12">
             <div className="max-w-md mx-auto">
-              <div className="text-6xl mb-4">📝</div>
+              <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <User className="w-12 h-12 text-gray-400" />
+              </div>
               <h3 className="text-xl font-semibold mb-2">暂无文章</h3>
-              <p className="text-muted-foreground">还没有发布任何文章，请稍后再来查看。</p>
+              <p className="text-muted-foreground">目前还没有发布任何文章，请稍后再来查看。</p>
             </div>
+          </div>
+        )}
+
+        {/* 分页 - 如果需要的话可以后续添加 */}
+        {posts.length > 0 && (
+          <div className="mt-12 text-center">
+            <p className="text-muted-foreground">共 {posts.length} 篇文章</p>
           </div>
         )}
       </div>

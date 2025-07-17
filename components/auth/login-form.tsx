@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@/lib/user-context"
 
 export default function LoginForm() {
@@ -37,7 +37,7 @@ export default function LoginForm() {
       if (response.ok) {
         toast({
           title: "登录成功",
-          description: "您已成功登录。",
+          description: `欢迎回来，${data.user?.username || "用户"}！`,
         })
         refreshUser() // 刷新用户上下文
         router.push("/") // 登录成功后跳转到首页

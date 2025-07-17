@@ -1,6 +1,7 @@
 import { getPostBySlug, markdownToHtml } from "@/lib/posts"
 import { notFound } from "next/navigation"
 import Image from "next/image"
+import { ViewTracker } from "@/components/view-tracker"
 
 export default async function PostPage({ params }: { params: { slug: string } }) {
   const post = await getPostBySlug(params.slug)
@@ -13,6 +14,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <ViewTracker postId={post.id} />
       <article className="max-w-3xl mx-auto">
         {post.cover_image && (
           <div className="mb-8">
@@ -42,6 +44,12 @@ export default async function PostPage({ params }: { params: { slug: string } })
           <span>
             {new Date(post.created_at).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" })}
           </span>
+          {post.view_count && (
+            <>
+              <span className="mx-2">·</span>
+              <span>{post.view_count} 次阅读</span>
+            </>
+          )}
         </div>
         <div
           className="prose prose-lg dark:prose-invert max-w-none"

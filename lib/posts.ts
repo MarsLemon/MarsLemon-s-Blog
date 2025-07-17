@@ -16,6 +16,7 @@ export interface Post {
   published: boolean
   is_featured: boolean
   is_pinned: boolean
+  view_count?: number
 }
 
 export async function getAllPosts(): Promise<Post[]> {
@@ -29,7 +30,7 @@ export async function getAllPosts(): Promise<Post[]> {
       SELECT 
         id, title, content, excerpt, slug, cover_image,
         author_name, author_avatar, created_at, updated_at,
-        published, is_featured, is_pinned
+        published, is_featured, is_pinned, view_count
       FROM posts 
       WHERE published = true 
       ORDER BY is_pinned DESC, created_at DESC
@@ -52,7 +53,7 @@ export async function getFeaturedPost(): Promise<Post | null> {
       SELECT 
         id, title, content, excerpt, slug, cover_image,
         author_name, author_avatar, created_at, updated_at,
-        published, is_featured, is_pinned
+        published, is_featured, is_pinned, view_count
       FROM posts 
       WHERE published = true AND is_featured = true 
       ORDER BY created_at DESC 
@@ -76,7 +77,7 @@ export async function getRecentPosts(limit = 5): Promise<Post[]> {
       SELECT 
         id, title, content, excerpt, slug, cover_image,
         author_name, author_avatar, created_at, updated_at,
-        published, is_featured, is_pinned
+        published, is_featured, is_pinned, view_count
       FROM posts 
       WHERE published = true 
       ORDER BY created_at DESC 
@@ -100,7 +101,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       SELECT 
         id, title, content, excerpt, slug, cover_image,
         author_name, author_avatar, created_at, updated_at,
-        published, is_featured, is_pinned
+        published, is_featured, is_pinned, view_count
       FROM posts 
       WHERE slug = ${slug} AND published = true
     `
@@ -122,7 +123,7 @@ export async function getPostById(id: number): Promise<Post | null> {
       SELECT 
         id, title, content, excerpt, slug, cover_image,
         author_name, author_avatar, created_at, updated_at,
-        published, is_featured, is_pinned
+        published, is_featured, is_pinned, view_count
       FROM posts 
       WHERE id = ${id}
     `

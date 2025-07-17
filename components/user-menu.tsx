@@ -12,16 +12,30 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { useUser } from "@/lib/user-context"
 import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 import { User, Settings, Shield, LogOut, PlusCircle } from "lucide-react"
 
 export function UserMenu() {
   const { user, logout } = useUser()
   const router = useRouter()
+  const { toast } = useToast()
 
   const handleLogout = async () => {
-    await logout()
-    router.push("/")
+    try {
+      await logout()
+      toast({
+        title: "退出成功",
+        description: "您已成功退出登录。",
+      })
+      router.push("/")
+    } catch (error) {
+      toast({
+        title: "退出失败",
+        description: "退出登录时发生错误，请重试。",
+        variant: "destructive",
+      })
+    }
   }
 
   if (!user) {
