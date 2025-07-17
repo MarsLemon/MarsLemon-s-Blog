@@ -15,12 +15,8 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { User, Settings, Shield, LogOut, PlusCircle } from "lucide-react"
 
-interface UserMenuProps {
-  user: any
-}
-
-export function UserMenu({ user }: UserMenuProps) {
-  const { logout } = useUser()
+export function UserMenu() {
+  const { user, logout } = useUser()
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -37,8 +33,8 @@ export function UserMenu({ user }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar_url || "/placeholder-user.jpg"} alt={user.username || "用户头像"} />
-            <AvatarFallback>{user.username ? user.username[0].toUpperCase() : "U"}</AvatarFallback>
+            <AvatarImage src={user.avatar_url || "/placeholder.svg?height=32&width=32"} alt={user.username} />
+            <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -47,6 +43,7 @@ export function UserMenu({ user }: UserMenuProps) {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user.username}</p>
             <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+            {user.is_admin && <p className="text-xs leading-none text-blue-600 font-medium">管理员</p>}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

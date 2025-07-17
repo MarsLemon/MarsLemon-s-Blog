@@ -7,10 +7,10 @@ export interface User {
   id: number
   username: string
   email: string
-  avatar_url?: string
+  avatar_url?: string | null
   is_admin: boolean
   is_verified: boolean
-  created_at: string
+  created_at?: string
 }
 
 interface UserContextType {
@@ -18,6 +18,7 @@ interface UserContextType {
   loading: boolean
   refreshUser: () => Promise<void>
   logout: () => Promise<void>
+  updateAvatar: (file: File) => Promise<void>
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -30,11 +31,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await fetch("/api/auth/me", {
         credentials: "include",
+        cache: "no-store",
       })
 
       if (response.ok) {
-        const userData = await response.json()
-        setUser(userData)
+        const data = await response.json()
+        console.log("用户数据:", data) // 调试日志
+        if (data.success && data.user) {
+          setUser(data.user)
+        } else {
+          setUser(null)
+        }
       } else {
         setUser(null)
       }
@@ -58,11 +65,35 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const updateAvatar = async (file: File) => {
+    const formData = new FormData()
+    formData.append("file", file)
+
+    const response = await fetch("/api/upload/avatar", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      // 更新用户头像URL
+      if (user) {
+        setUser({ ...user, avatar_url: data.avatarUrl })
+      }
+    } else {
+      throw new Error(data.message || "头像上传失败")
+    }
+  }
+
   useEffect(() => {
     refreshUser()
   }, [])
 
-  return <UserContext.Provider value={{ user, loading, refreshUser, logout }}>{children}</UserContext.Provider>
+  return (
+    <UserContext.Provider value={{ user, loading, refreshUser, logout, updateAvatar }}>{children}</UserContext.Provider>
+  )
 }
 
 export function useUser() {
