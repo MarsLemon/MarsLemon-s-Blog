@@ -59,9 +59,9 @@ export function PostCard({ post }: PostCardProps) {
                 src={post.author?.avatar || "/placeholder.svg"}
                 alt={post.author?.name}
               />
-              <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{post.author?.name.charAt(0)}</AvatarFallback>
             </Avatar>
-            <span className="text-sm font-medium">{post.author.name}</span>
+            <span className="text-sm font-medium">{post.author?.name}</span>
           </div>
         </CardFooter>
       </Card>

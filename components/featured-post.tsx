@@ -44,10 +44,10 @@ export function FeaturedPost({ post }: FeaturedPostProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={post.author?.avatar || "/placeholder.svg"} alt={post.author.name} />
+              <AvatarImage src={post.author?.avatar || "/placeholder.svg"} alt={post.author?.name} />
               <AvatarFallback>{post.author?.name?.charAt(0)}</AvatarFallback>
             </Avatar>
-            <span className="text-sm font-medium">{post.author.name}</span>
+            <span className="text-sm font-medium">{post.author?.name}</span>
           </div>
           <Link href={`/blog/${post.slug}`}>
             <Button variant="secondary">Read More</Button>
