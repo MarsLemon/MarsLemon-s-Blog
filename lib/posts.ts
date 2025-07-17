@@ -1,116 +1,160 @@
 import { neon } from "@neondatabase/serverless"
-import { marked } from "marked"
-import DOMPurify from "isomorphic-dompurify"
 
-/**
- * DATABASE_URL 请在 Vercel 环境变量或本地 .env 中配置
- * 例如：postgres://user:password@host:5432/db
- */
-if (!process.env.DATABASE_URL) {
-  console.warn("[lib/posts] 缺少 DATABASE_URL，查询将返回空数组")
-}
+const sql = neon(process.env.DATABASE_URL!)
 
-/* ---------- 数据库客户端 ---------- */
-const sql =
-  process.env.DATABASE_URL != null
-    ? neon(process.env.DATABASE_URL)
-    : // 缺少连接信息时返回空结果，避免编译期报错
-      ((async () => []) as unknown as ReturnType<typeof neon>)
-
-/* ---------- 类型，与 posts 表字段一致 ---------- */
 export interface Post {
   id: number
   title: string
-  slug: string
   content: string
-  excerpt: string | null
+  excerpt: string
+  slug: string
   cover_image: string | null
-  author_name: string | null
+  author_name: string
   author_avatar: string | null
+  created_at: string
+  updated_at: string
   published: boolean
   is_featured: boolean
   is_pinned: boolean
-  created_at: string
 }
 
-/* ---------- 查询函数 ---------- */
-
-/** 全部已发布文章：置顶优先、时间倒序 */
 export async function getAllPosts(): Promise<Post[]> {
-  const rows = await sql<Post[]>`
-    SELECT *
-    FROM posts
-    WHERE published = true
-    ORDER BY is_pinned DESC, created_at DESC
-  `
-  return rows
+  try {
+    if (!process.env.DATABASE_URL) {
+      console.warn("DATABASE_URL not found, returning empty posts array")
+      return []
+    }
+
+    const posts = await sql`
+      SELECT 
+        id, title, content, excerpt, slug, cover_image,
+        author_name, author_avatar, created_at, updated_at,
+        published, is_featured, is_pinned
+      FROM posts 
+      WHERE published = true 
+      ORDER BY is_pinned DESC, created_at DESC
+    `
+
+    return posts as Post[]
+  } catch (error) {
+    console.error("获取所有文章错误:", error)
+    return []
+  }
 }
 
-/** 最新文章（排除精选），默认取 3 篇 */
-export async function getRecentPosts(limit = 3): Promise<Post[]> {
-  const rows = await sql<Post[]>`
-    SELECT *
-    FROM posts
-    WHERE published = true
-      AND is_featured = false
-    ORDER BY is_pinned DESC, created_at DESC
-    LIMIT ${limit}
-  `
-  return rows
-}
-
-/** 最新一篇精选文章 */
 export async function getFeaturedPost(): Promise<Post | null> {
-  const [post] = await sql<Post[]>`
-    SELECT *
-    FROM posts
-    WHERE published = true
-      AND is_featured = true
-    ORDER BY created_at DESC
-    LIMIT 1
-  `
-  return post ?? null
+  try {
+    if (!process.env.DATABASE_URL) {
+      return null
+    }
+
+    const posts = await sql`
+      SELECT 
+        id, title, content, excerpt, slug, cover_image,
+        author_name, author_avatar, created_at, updated_at,
+        published, is_featured, is_pinned
+      FROM posts 
+      WHERE published = true AND is_featured = true 
+      ORDER BY created_at DESC 
+      LIMIT 1
+    `
+
+    return (posts[0] as Post) || null
+  } catch (error) {
+    console.error("获取精选文章错误:", error)
+    return null
+  }
 }
 
-/** 根据 slug 获取单篇文章 */
+export async function getRecentPosts(limit = 5): Promise<Post[]> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      return []
+    }
+
+    const posts = await sql`
+      SELECT 
+        id, title, content, excerpt, slug, cover_image,
+        author_name, author_avatar, created_at, updated_at,
+        published, is_featured, is_pinned
+      FROM posts 
+      WHERE published = true 
+      ORDER BY created_at DESC 
+      LIMIT ${limit}
+    `
+
+    return posts as Post[]
+  } catch (error) {
+    console.error("获取最新文章错误:", error)
+    return []
+  }
+}
+
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  const [post] = await sql<Post[]>`
-    SELECT *
-    FROM posts
-    WHERE slug = ${slug}
-      AND published = true
-    LIMIT 1
-  `
-  return post ?? null
+  try {
+    if (!process.env.DATABASE_URL) {
+      return null
+    }
+
+    const posts = await sql`
+      SELECT 
+        id, title, content, excerpt, slug, cover_image,
+        author_name, author_avatar, created_at, updated_at,
+        published, is_featured, is_pinned
+      FROM posts 
+      WHERE slug = ${slug} AND published = true
+    `
+
+    return (posts[0] as Post) || null
+  } catch (error) {
+    console.error("根据slug获取文章错误:", error)
+    return null
+  }
 }
 
-/**
- * 兼容旧代码：getPosts(limit)
- * limit 为空 → getAllPosts
- * limit 有值 → getRecentPosts(limit)
- */
-export async function getPosts(limit?: number): Promise<Post[]> {
-  return typeof limit === "number" ? getRecentPosts(limit) : getAllPosts()
+export async function getPostById(id: number): Promise<Post | null> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      return null
+    }
+
+    const posts = await sql`
+      SELECT 
+        id, title, content, excerpt, slug, cover_image,
+        author_name, author_avatar, created_at, updated_at,
+        published, is_featured, is_pinned
+      FROM posts 
+      WHERE id = ${id}
+    `
+
+    return (posts[0] as Post) || null
+  } catch (error) {
+    console.error("根据ID获取文章错误:", error)
+    return null
+  }
 }
 
-// 辅助函数：生成 slug
 export function generateSlug(title: string): string {
   return title
     .toLowerCase()
-    .replace(/[^\w\s-]/g, "") // 移除特殊字符
-    .replace(/\s+/g, "-") // 空格替换为连字符
-    .replace(/-+/g, "-") // 多个连字符替换为单个
-    .trim() // 去除首尾空格
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
 }
 
-// 辅助函数：将 Markdown 转换为 HTML
+export function extractExcerpt(content: string, maxLength = 150): string {
+  const plainText = content.replace(/<[^>]*>/g, "").replace(/[#*`]/g, "")
+  return plainText.length > maxLength ? plainText.substring(0, maxLength) + "..." : plainText
+}
+
 export function markdownToHtml(markdown: string): string {
-  const html = marked.parse(markdown)
-  return DOMPurify.sanitize(html as string)
-}
-
-// 辅助函数：提取纯文本摘要
-export function extractExcerpt(content: string, length = 160): string {
-  const plainText = content.replace(/<\/?[^>]+(>|$)/g, "") // 移除 HTML 标签
-  return plainText.substring(0, length) + (plainText.length > length ? "..." : "")
+  return markdown
+    .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+    .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+    .replace(/^# (.*$)/gim, "<h1>$1</h1>")
+    .replace(/\*\*(.*)\*\*/gim, "<strong>$1</strong>")
+    .replace(/\*(.*)\*/gim, "<em>$1</em>")
+    .replace(/!\[([^\]]*)\]$$([^$$]*)\)/gim, '<img alt="$1" src="$2" />')
+    .replace(/\[([^\]]*)\]$$([^$$]*)\)/gim, '<a href="$2">$1</a>')
+    .replace(/\n/gim, "<br>")
 }
