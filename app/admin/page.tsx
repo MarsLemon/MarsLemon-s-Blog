@@ -103,7 +103,7 @@ export default function AdminDashboard() {
           <div className="flex gap-2">
             <Button onClick={() => router.push("/admin/posts/new")}>
               <Plus className="mr-2 h-4 w-4" />
-             新建
+                 新建
             </Button>
           </div>
         </div>
