@@ -1,15 +1,11 @@
 import crypto from "crypto"
 
 export function getFileHash(buffer: Buffer): string {
-  return crypto.createHash("sha1").update(buffer).digest("hex")
-}
-
-export function calculateSHA1(buffer: Buffer): string {
-  return crypto.createHash("sha1").update(buffer).digest("hex")
+  return crypto.createHash("sha256").update(buffer).digest("hex")
 }
 
 export function calculateFileHash(buffer: Buffer): string {
-  return crypto.createHash("sha1").update(buffer).digest("hex")
+  return getFileHash(buffer)
 }
 
 export async function getFileBuffer(file: File): Promise<Buffer> {

@@ -154,7 +154,11 @@ export function markdownToHtml(markdown: string): string {
     .replace(/^# (.*$)/gim, "<h1>$1</h1>")
     .replace(/\*\*(.*)\*\*/gim, "<strong>$1</strong>")
     .replace(/\*(.*)\*/gim, "<em>$1</em>")
-    .replace(/!\[([^\]]*)\]$$([^$$]*)\)/gim, '<img alt="$1" src="$2" />')
-    .replace(/\[([^\]]*)\]$$([^$$]*)\)/gim, '<a href="$2">$1</a>')
+    .replace(/!\[([^\]]*)\]$$([^)]*)$$/gim, '<img alt="$1" src="$2" />')
+    .replace(/\[([^\]]*)\]$$([^)]*)$$/gim, '<a href="$2">$1</a>')
     .replace(/\n/gim, "<br>")
+}
+
+export async function getPosts(limit?: number): Promise<Post[]> {
+  return typeof limit === "number" ? getRecentPosts(limit) : getAllPosts()
 }
