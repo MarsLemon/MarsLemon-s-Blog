@@ -56,7 +56,7 @@ export function PostCard({ post }: PostCardProps) {
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
               <AvatarImage
-                src={post.author.avatar || "/placeholder.svg"}
+                src={post.author?.avatar || "/placeholder.svg"}
                 alt={post.author.name}
               />
               <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
