@@ -162,7 +162,7 @@ export default function AdminDashboard() {
                 <p className="text-muted-foreground mb-4">No posts found</p>
                 <Button onClick={() => router.push("/admin/posts/new")}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Create your first post
+                创建第一条
                 </Button>
               </CardContent>
             </Card>
