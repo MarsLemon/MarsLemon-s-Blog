@@ -58,7 +58,7 @@ export async function deleteSession() {
 }
 
 export async function getSessionUser(): Promise<User | null> {
-  const session = cookies().get("session-token")?.value
+  const session =await( cookies()).get("session-token")?.value
   if (!session) return null
 
   const payload = await decrypt(session)
