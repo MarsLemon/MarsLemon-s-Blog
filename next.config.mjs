@@ -3,7 +3,6 @@ const nextConfig = {
   serverExternalPackages: ["bcryptjs"],
   experimental: {
     optimizePackageImports: ["lucide-react"],
-
   },
   eslint: {
     ignoreDuringBuilds: true,

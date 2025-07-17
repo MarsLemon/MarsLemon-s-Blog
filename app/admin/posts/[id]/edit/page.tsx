@@ -23,7 +23,6 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
   }
 
   const handleSave = async (postData: any) => {
-    "use server"
 
     try {
       const response = await fetch(
