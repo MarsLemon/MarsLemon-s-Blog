@@ -44,7 +44,7 @@ export async function createSession(userId: number, username: string, email: str
   const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 hours
   const session = await encrypt({ userId, username, email, isAdmin, expiresAt })
 
-  cookies().set("session-token", session, {
+  (await cookies()).set("session-token", session, {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
     expires: expiresAt,
