@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   title: "开发博客 - 现代Web开发",
   description: "关于现代Web开发、React、Next.js等技术的博客",
   generator: "v0.dev",
-  icon: '/favicon.ico',
+  icon: '/public/favicon.ico',
 }
 
 export default function RootLayout({
