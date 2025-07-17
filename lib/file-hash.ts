@@ -4,13 +4,15 @@ export function getFileHash(buffer: Buffer): string {
   return crypto.createHash("sha1").update(buffer).digest("hex")
 }
 
-export function calculateSHA1FromArrayBuffer(arrayBuffer: ArrayBuffer): string {
-  const buffer = Buffer.from(arrayBuffer)
-  return getFileHash(buffer)
+export function calculateSHA1(buffer: Buffer): string {
+  return crypto.createHash("sha1").update(buffer).digest("hex")
 }
 
-// 客户端使用的文件哈希计算
-export async function calculateFileHash(file: File): Promise<string> {
+export function calculateFileHash(buffer: Buffer): string {
+  return crypto.createHash("sha1").update(buffer).digest("hex")
+}
+
+export async function getFileBuffer(file: File): Promise<Buffer> {
   const arrayBuffer = await file.arrayBuffer()
-  return calculateSHA1FromArrayBuffer(arrayBuffer)
+  return Buffer.from(arrayBuffer)
 }
