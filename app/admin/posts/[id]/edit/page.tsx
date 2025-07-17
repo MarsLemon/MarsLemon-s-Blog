@@ -27,7 +27,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/posts/${postId}`,
+        `/api/admin/posts/${postId}`,
         {
           method: "PUT",
           headers: {
