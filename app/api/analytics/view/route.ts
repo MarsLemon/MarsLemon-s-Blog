@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 import { verifyToken } from "@/lib/verify-token"
-import {env} from "@/lib/env"
+import { env } from "@/lib/env"
 
 const sql = neon(env.DATABASE_URL!)
 

@@ -1,59 +1,78 @@
 import Link from "next/link"
 import Image from "next/image"
-import { CalendarIcon } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-
-interface Author {
-  name: string
-  avatar: string
-}
-
-interface Post {
-  title: string
-  excerpt: string
-  date: string
-  author: Author
-  coverImage: string
-  slug: string
-}
+import { CalendarDays } from "lucide-react"
+import type { Post } from "@/lib/db"
 
 interface FeaturedPostProps {
   post: Post
 }
 
 export function FeaturedPost({ post }: FeaturedPostProps) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  }
+
   return (
-    <div className="relative overflow-hidden rounded-xl">
-      <div className="relative h-[500px] w-full">
-        <Image src={post.coverImage || "/placeholder.svg"} alt={post.title} fill className="object-cover" priority />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/0" />
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium">
-            Featured
-          </span>
-          <div className="flex items-center text-sm">
-            <CalendarIcon className="mr-1 h-3 w-3" />
-            {post.date}
+    <section className="mb-12">
+      <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          <div className="relative aspect-video md:aspect-auto md:h-full">
+            {post.cover_image && (
+              <Image
+                src={post.cover_image || "/placeholder.svg"}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            )}
+            <div className="absolute top-4 left-4 flex gap-2">
+              {post.is_featured && <Badge variant="default">精选</Badge>}
+              {post.is_pinned && <Badge variant="destructive">置顶</Badge>}
+            </div>
+          </div>
+          <div className="p-6 flex flex-col justify-center">
+            <CardHeader className="p-0 mb-4">
+              <CardTitle className="text-3xl font-bold line-clamp-2">
+                <Link href={`/blog/${post.slug}`} className="hover:text-blue-600 transition-colors">
+                  {post.title}
+                </Link>
+              </CardTitle>
+              <CardDescription className="text-lg line-clamp-3">{post.excerpt}</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex items-center space-x-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={post.author_avatar || "/placeholder-user.jpg"} />
+                    <AvatarFallback>{post.author_name.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span>{post.author_name}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <CalendarDays className="w-4 h-4" />
+                  <span>{formatDate(post.created_at)}</span>
+                </div>
+              </div>
+              <div className="mt-6">
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="inline-flex items-center font-medium text-blue-600 hover:text-blue-800"
+                >
+                  阅读更多 →
+                </Link>
+              </div>
+            </CardContent>
           </div>
         </div>
-        <h1 className="text-2xl md:text-4xl font-bold mb-3">{post.title}</h1>
-        <p className="text-sm md:text-base mb-6 max-w-2xl text-gray-200">{post.excerpt}</p>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={post.author?.avatar || "/placeholder.svg"} alt={post.author?.name} />
-              <AvatarFallback>{post.author?.name?.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <span className="text-sm font-medium">{post.author?.name}</span>
-          </div>
-          <Link href={`/blog/${post.slug}`}>
-            <Button variant="secondary">Read More</Button>
-          </Link>
-        </div>
-      </div>
-    </div>
+      </Card>
+    </section>
   )
 }

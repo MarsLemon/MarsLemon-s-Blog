@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 import bcrypt from "bcryptjs"
-import {env} from "@/lib/env"
+import { env } from "@/lib/env"
 
 const sql = neon(env.DATABASE_URL!)
 
