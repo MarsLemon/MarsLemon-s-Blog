@@ -50,7 +50,22 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     const body = await request.json()
-    const { title, content, cover_image, published, is_featured, is_pinned } = body
+    const { title, content, cover_image, published, is_featured, is_pinned ,only_change_publish} = body
+
+    if(only_change_publish){
+     // 更新文章发布状态
+      const result = await sql`
+        UPDATE posts SET    
+          published = ${published || false},    
+          updated_at = NOW()
+        WHERE id = ${postId}
+        RETURNING id, title, slug, updated_at
+      `
+      return NextResponse.json({
+        message: "文章更新成功",
+        post: result[0],
+      })
+    }
 
     if (!title || !content) {
       return NextResponse.json({ message: "标题和内容是必填项" }, { status: 400 })
