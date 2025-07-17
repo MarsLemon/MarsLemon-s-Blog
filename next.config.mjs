@@ -1,9 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ["bcryptjs"],
-  experimental: {
-    optimizePackageImports: ["lucide-react"],
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -11,8 +7,22 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.vercel.app',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.vercel-storage.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.gravatar.com',
+      },
+    ],
     unoptimized: true,
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;

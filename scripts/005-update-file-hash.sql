@@ -97,3 +97,7 @@ BEGIN
         ALTER TABLE posts ADD COLUMN is_pinned BOOLEAN DEFAULT FALSE;
     END IF;
 END $$;
+
+-- This script is for updating the file_hash column.
+-- It's intended to be run once to backfill existing data if needed.
+-- For new uploads, the hash is generated and stored directly.

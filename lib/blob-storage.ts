@@ -26,9 +26,20 @@ export class BlobStorage {
   async deleteFile(url: string): Promise<void> {
     try {
       await del(url)
+      console.log(`Blob deleted: ${url}`)
     } catch (error) {
-      console.error("Blob delete error:", error)
-      throw new Error(`Failed to delete file: ${error instanceof Error ? error.message : "Unknown error"}`)
+      console.error(`Failed to delete blob ${url}:`, error)
+      throw new Error(`Failed to delete blob: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
+  }
+}
+
+export async function deleteBlob(url: string) {
+  try {
+    await del(url)
+    console.log(`Blob deleted: ${url}`)
+  } catch (error) {
+    console.error(`Failed to delete blob ${url}:`, error)
+    throw new Error(`Failed to delete blob: ${error instanceof Error ? error.message : "Unknown error"}`)
   }
 }

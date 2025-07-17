@@ -1,41 +1,53 @@
 import type { NextRequest } from "next/server"
-import { getSessionUser, type User } from "./auth"
+import jwt from "jsonwebtoken"
+import { env } from "@/lib/env"
+import { neon } from "@neondatabase/serverless"
 
-export async function verifyAdminToken(request: NextRequest): Promise<boolean> {
-  try {
-    const sessionToken = request.cookies.get("session-token")?.value
+const sql = neon(env.DATABASE_URL!)
+const JWT_SECRET = env.JWT_SECRET!
 
-    if (!sessionToken) {
-      return false
-    }
-
-    const user = await getSessionUser(sessionToken)
-    return user?.is_admin === true
-  } catch (error) {
-    return false
-  }
+interface DecodedToken {
+  userId: number
+  username: string
+  email: string
+  isAdmin: boolean
+  iat: number
+  exp: number
 }
 
-export async function getCurrentUser(request: NextRequest) {
-  try {
-    const sessionToken = request.cookies.get("session-token")?.value
+interface SessionUser {
+  id: number
+  username: string
+  email: string
+  avatar_url?: string | null
+  is_admin: boolean
+  is_verified: boolean
+  created_at?: string
+}
 
-    if (!sessionToken) {
+export async function verifyToken(request: NextRequest): Promise<SessionUser | null> {
+  const token = request.cookies.get("token")?.value
+
+  if (!token) {
+    return null
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken
+
+    const users = await sql`
+      SELECT id, username, email, avatar_url, is_admin, is_verified, created_at
+      FROM users
+      WHERE id = ${decoded.userId}
+    `
+
+    if (users.length === 0) {
       return null
     }
 
-    return await getSessionUser(sessionToken)
+    return users[0] as SessionUser
   } catch (error) {
+    console.error("Token verification failed:", error)
     return null
   }
-}
-
-export async function verifyToken(request: NextRequest): Promise<User | null> {
-  const sessionToken = request.cookies.get("session-token")?.value
-
-  if (!sessionToken) {
-    return null
-  }
-
-  return await getSessionUser(sessionToken)
 }

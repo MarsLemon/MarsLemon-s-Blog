@@ -1,43 +1,51 @@
--- 创建管理员表
-CREATE TABLE IF NOT EXISTS admin (
+CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    avatar_url VARCHAR(255),
+    is_admin BOOLEAN DEFAULT FALSE,
+    is_verified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 创建文章表
 CREATE TABLE IF NOT EXISTS posts (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) UNIQUE NOT NULL,
-    excerpt TEXT,
     content TEXT NOT NULL,
-    cover_image VARCHAR(500),
-    author_name VARCHAR(100) DEFAULT 'Admin',
-    author_avatar VARCHAR(500) DEFAULT '/placeholder.svg?height=40&width=40',
-    author_bio VARCHAR(255) DEFAULT 'Blog Administrator',
+    excerpt VARCHAR(500),
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    cover_image VARCHAR(255),
+    author_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    published BOOLEAN DEFAULT FALSE,
     is_featured BOOLEAN DEFAULT FALSE,
     is_pinned BOOLEAN DEFAULT FALSE,
-    published BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    view_count INTEGER DEFAULT 0
 );
 
--- 创建文件表
+CREATE TABLE IF NOT EXISTS comments (
+    id SERIAL PRIMARY KEY,
+    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    author_name VARCHAR(255) NOT NULL,
+    author_email VARCHAR(255),
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    approved BOOLEAN DEFAULT FALSE
+);
+
 CREATE TABLE IF NOT EXISTS files (
     id SERIAL PRIMARY KEY,
     filename VARCHAR(255) NOT NULL,
     original_name VARCHAR(255) NOT NULL,
-    file_path VARCHAR(500) NOT NULL,
+    file_path VARCHAR(255) UNIQUE NOT NULL,
     file_type VARCHAR(100) NOT NULL,
     file_size INTEGER NOT NULL,
-    folder VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    file_hash VARCHAR(64) UNIQUE NOT NULL,
+    folder VARCHAR(50),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
--- 创建索引
-CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug);
-CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_posts_pinned ON posts(is_pinned);
-CREATE INDEX IF NOT EXISTS idx_files_folder ON files(folder);

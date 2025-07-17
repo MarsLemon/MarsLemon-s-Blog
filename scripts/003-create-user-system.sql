@@ -1,3 +1,7 @@
+-- This script is for creating the user system.
+-- The actual user creation is handled in app/api/init/route.ts
+-- and app/api/auth/register/route.ts
+
 -- 删除旧的admin表
 DROP TABLE IF EXISTS admin;
 
@@ -34,7 +38,7 @@ VALUES (
     '$2a$12$8K1p/a0dclxKxYqmhQhXUeL4f/Aq2qVVdw2E8Aq2qVVdw2E8Aq2qVV', -- Mars9807130015
     true, 
     true,
-    '/placeholder.svg?height=40&width=40'
+    '/placeholder.png?height=40&width=40'
 ) ON CONFLICT (username) DO NOTHING;
 
 -- 创建索引

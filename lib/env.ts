@@ -1,8 +1,19 @@
-export const localEnv = {
-  JWT_SECRET:"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",
-  DATABASE_URL:"postgres://neondb_owner:npg_S3FPlxKdyQ6j@ep-floral-heart-adkjfqfm-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require",
-  NODE_ENV:"develop",
-  NEXT_PUBLIC_BASE_URL:"http://localhost:3000"
-}
+import { createEnv } from "@t3-oss/env-nextjs"
+import { z } from "zod"
 
-export const env =process.env.NODE_ENV === "production"? process.env:localEnv
+export const env = createEnv({
+  server: {
+    DATABASE_URL: z.string().url(),
+    BLOB_READ_WRITE_TOKEN: z.string(),
+    JWT_SECRET: z.string().min(32), // JWT secret should be strong
+  },
+  client: {
+    NEXT_PUBLIC_BASE_URL: z.string().url(),
+  },
+  runtimeEnv: {
+    DATABASE_URL: process.env.DATABASE_URL,
+    BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
+    JWT_SECRET: process.env.JWT_SECRET,
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+  },
+})

@@ -133,7 +133,7 @@ export function ProfileForm({ user, onUpdate }: ProfileFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex items-center space-x-4">
         <Avatar className="h-20 w-20">
-          <AvatarImage src={avatarUrl || "/placeholder-user.jpg"} alt={username} />
+          <AvatarImage src={avatarUrl || "/placeholder-user.png"} alt={username} />
           <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div className="space-y-2">

@@ -36,7 +36,7 @@ export default async function BlogPage() {
                   {post.cover_image && (
                     <div className="aspect-video overflow-hidden rounded-t-lg">
                       <img
-                        src={post.cover_image || "/placeholder.svg"}
+                        src={post.cover_image || "/placeholder.png"}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -65,7 +65,7 @@ export default async function BlogPage() {
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <div className="flex items-center space-x-2">
                       <Avatar className="w-6 h-6">
-                        <AvatarImage src={post.author_avatar || "/placeholder-user.jpg"} />
+                        <AvatarImage src={post.author_avatar || "/placeholder-user.png"} />
                         <AvatarFallback>{post.author_name.charAt(0).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <span>{post.author_name}</span>

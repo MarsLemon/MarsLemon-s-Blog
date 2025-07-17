@@ -1,6 +1,9 @@
 import { marked } from "marked"
 import { markedHighlight } from "marked-highlight"
 import hljs from "highlight.js"
+import { remark } from "remark"
+import html from "remark-html"
+import remarkGfm from "remark-gfm"
 
 // Configure marked with modern features
 marked.use(
@@ -167,7 +170,8 @@ const extensions = [
 extensions.forEach((ext) => marked.use({ extensions: [ext] }))
 
 export function markdownToHtml(markdown: string): string {
-  return marked.parse(markdown)
+  const result = remark().use(remarkGfm).use(html).processSync(markdown)
+  return result.toString()
 }
 
 export function extractExcerpt(content: string, length = 160): string {
