@@ -159,7 +159,7 @@ export default function AdminDashboard() {
           {posts.length === 0 && (
             <Card>
               <CardContent className="text-center py-12">
-                <p className="text-muted-foreground mb-4">No posts found</p>
+                <p className="text-muted-foreground mb-4">当前无信息</p>
                 <Button onClick={() => router.push("/admin/posts/new")}>
                   <Plus className="mr-2 h-4 w-4" />
                 创建第一条
