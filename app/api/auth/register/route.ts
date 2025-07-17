@@ -1,29 +1,26 @@
 import { NextResponse } from "next/server"
-import { checkUserExists, hashPassword, createUser, createSession } from "@/lib/auth"
+import { getUserByUsernameOrEmail, createUser, hashPassword, createSession } from "@/lib/auth"
 
 export async function POST(request: Request) {
   try {
     const { username, email, password } = await request.json()
 
     if (!username || !email || !password) {
-      return NextResponse.json({ message: "所有字段都是必填项" }, { status: 400 })
+      return NextResponse.json({ message: "用户名、邮箱和密码是必填项" }, { status: 400 })
     }
 
-    if (password.length < 6) {
-      return NextResponse.json({ message: "密码至少需要6个字符" }, { status: 400 })
+    // 检查用户名或邮箱是否已存在
+    const existingUser = await getUserByUsernameOrEmail(username)
+    if (existingUser) {
+      return NextResponse.json({ message: "用户名或邮箱已存在" }, { status: 409 })
     }
-
-    const userExists = await checkUserExists(username, email)
-    if (userExists) {
+    const existingEmail = await getUserByUsernameOrEmail(email)
+    if (existingEmail) {
       return NextResponse.json({ message: "用户名或邮箱已存在" }, { status: 409 })
     }
 
-    const hashedPassword = await hashPassword(password)
-    const newUser = await createUser(username, email, hashedPassword)
-
-    if (!newUser) {
-      return NextResponse.json({ message: "注册失败，请重试" }, { status: 500 })
-    }
+    const passwordHash = await hashPassword(password)
+    const newUser = await createUser(username, email, passwordHash)
 
     // 注册成功后自动登录
     await createSession(newUser)

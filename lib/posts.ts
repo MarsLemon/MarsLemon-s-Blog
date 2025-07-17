@@ -1,224 +1,116 @@
 import { neon } from "@neondatabase/serverless"
-import { remark } from "remark"
-import html from "remark-html"
-import stripMarkdown from "strip-markdown"
+import { marked } from "marked"
+import DOMPurify from "isomorphic-dompurify"
 
-const sql = neon(process.env.DATABASE_URL!)
+/**
+ * DATABASE_URL 请在 Vercel 环境变量或本地 .env 中配置
+ * 例如：postgres://user:password@host:5432/db
+ */
+if (!process.env.DATABASE_URL) {
+  console.warn("[lib/posts] 缺少 DATABASE_URL，查询将返回空数组")
+}
 
+/* ---------- 数据库客户端 ---------- */
+const sql =
+  process.env.DATABASE_URL != null
+    ? neon(process.env.DATABASE_URL)
+    : // 缺少连接信息时返回空结果，避免编译期报错
+      ((async () => []) as unknown as ReturnType<typeof neon>)
+
+/* ---------- 类型，与 posts 表字段一致 ---------- */
 export interface Post {
-  id: string
+  id: number
   title: string
   slug: string
   content: string
-  excerpt: string
+  excerpt: string | null
   cover_image: string | null
+  author_name: string | null
+  author_avatar: string | null
   published: boolean
   is_featured: boolean
   is_pinned: boolean
   created_at: string
-  updated_at: string
 }
 
-/**
- * 获取所有文章
- */
-export async function getPosts(): Promise<Post[]> {
-  if (!process.env.DATABASE_URL) {
-    console.warn("DATABASE_URL is not set. Returning empty posts array.")
-    return []
-  }
-  try {
-    const posts = await sql<Post[]>`
-      SELECT id, title, slug, content, excerpt, cover_image, published, is_featured, is_pinned, created_at, updated_at
-      FROM posts
-      ORDER BY created_at DESC
-    `
-    return posts
-  } catch (error) {
-    console.error("获取文章错误:", error)
-    return []
-  }
+/* ---------- 查询函数 ---------- */
+
+/** 全部已发布文章：置顶优先、时间倒序 */
+export async function getAllPosts(): Promise<Post[]> {
+  const rows = await sql<Post[]>`
+    SELECT *
+    FROM posts
+    WHERE published = true
+    ORDER BY is_pinned DESC, created_at DESC
+  `
+  return rows
 }
 
-/**
- * 获取精选文章
- */
+/** 最新文章（排除精选），默认取 3 篇 */
+export async function getRecentPosts(limit = 3): Promise<Post[]> {
+  const rows = await sql<Post[]>`
+    SELECT *
+    FROM posts
+    WHERE published = true
+      AND is_featured = false
+    ORDER BY is_pinned DESC, created_at DESC
+    LIMIT ${limit}
+  `
+  return rows
+}
+
+/** 最新一篇精选文章 */
 export async function getFeaturedPost(): Promise<Post | null> {
-  if (!process.env.DATABASE_URL) {
-    console.warn("DATABASE_URL is not set. Returning null for featured post.")
-    return null
-  }
-  try {
-    const [post] = await sql<Post[]>`
-      SELECT id, title, slug, content, excerpt, cover_image, published, is_featured, is_pinned, created_at, updated_at
-      FROM posts
-      WHERE is_featured = TRUE AND published = TRUE
-      ORDER BY created_at DESC
-      LIMIT 1
-    `
-    return post ?? null
-  } catch (error) {
-    console.error("获取精选文章错误:", error)
-    return null
-  }
+  const [post] = await sql<Post[]>`
+    SELECT *
+    FROM posts
+    WHERE published = true
+      AND is_featured = true
+    ORDER BY created_at DESC
+    LIMIT 1
+  `
+  return post ?? null
 }
 
-/**
- * 获取最新文章
- */
-export async function getRecentPosts(limit = 5): Promise<Post[]> {
-  if (!process.env.DATABASE_URL) {
-    console.warn("DATABASE_URL is not set. Returning empty recent posts array.")
-    return []
-  }
-  try {
-    const posts = await sql<Post[]>`
-      SELECT id, title, slug, content, excerpt, cover_image, published, is_featured, is_pinned, created_at, updated_at
-      FROM posts
-      WHERE published = TRUE
-      ORDER BY created_at DESC
-      LIMIT ${limit}
-    `
-    return posts
-  } catch (error) {
-    console.error("获取最新文章错误:", error)
-    return []
-  }
-}
-
-/**
- * 根据 slug 获取文章
- */
+/** 根据 slug 获取单篇文章 */
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  if (!process.env.DATABASE_URL) {
-    console.warn("DATABASE_URL is not set. Returning null for post by slug.")
-    return null
-  }
-  try {
-    const [post] = await sql<Post[]>`
-      SELECT id, title, slug, content, excerpt, cover_image, published, is_featured, is_pinned, created_at, updated_at
-      FROM posts
-      WHERE slug = ${slug}
-      LIMIT 1
-    `
-    return post ?? null
-  } catch (error) {
-    console.error(`获取文章 (slug: ${slug}) 错误:`, error)
-    return null
-  }
+  const [post] = await sql<Post[]>`
+    SELECT *
+    FROM posts
+    WHERE slug = ${slug}
+      AND published = true
+    LIMIT 1
+  `
+  return post ?? null
 }
 
 /**
- * 创建新文章
+ * 兼容旧代码：getPosts(limit)
+ * limit 为空 → getAllPosts
+ * limit 有值 → getRecentPosts(limit)
  */
-export async function createPost(post: Omit<Post, "id" | "created_at" | "updated_at">): Promise<Post | null> {
-  if (!process.env.DATABASE_URL) {
-    console.warn("DATABASE_URL is not set. Cannot create post.")
-    return null
-  }
-  try {
-    const [newPost] = await sql<Post[]>`
-      INSERT INTO posts (title, slug, content, excerpt, cover_image, published, is_featured, is_pinned)
-      VALUES (
-        ${post.title},
-        ${post.slug},
-        ${post.content},
-        ${post.excerpt},
-        ${post.cover_image},
-        ${post.published},
-        ${post.is_featured},
-        ${post.is_pinned}
-      )
-      RETURNING id, title, slug, content, excerpt, cover_image, published, is_featured, is_pinned, created_at, updated_at
-    `
-    return newPost ?? null
-  } catch (error) {
-    console.error("创建文章错误:", error)
-    return null
-  }
+export async function getPosts(limit?: number): Promise<Post[]> {
+  return typeof limit === "number" ? getRecentPosts(limit) : getAllPosts()
 }
 
-/**
- * 更新文章
- */
-export async function updatePost(
-  id: string,
-  post: Partial<Omit<Post, "id" | "created_at" | "updated_at">>,
-): Promise<Post | null> {
-  if (!process.env.DATABASE_URL) {
-    console.warn("DATABASE_URL is not set. Cannot update post.")
-    return null
-  }
-  try {
-    const [updatedPost] = await sql<Post[]>`
-      UPDATE posts
-      SET
-        title = COALESCE(${post.title}, title),
-        slug = COALESCE(${post.slug}, slug),
-        content = COALESCE(${post.content}, content),
-        excerpt = COALESCE(${post.excerpt}, excerpt),
-        cover_image = COALESCE(${post.cover_image}, cover_image),
-        published = COALESCE(${post.published}, published),
-        is_featured = COALESCE(${post.is_featured}, is_featured),
-        is_pinned = COALESCE(${post.is_pinned}, is_pinned),
-        updated_at = NOW()
-      WHERE id = ${id}
-      RETURNING id, title, slug, content, excerpt, cover_image, published, is_featured, is_pinned, created_at, updated_at
-    `
-    return updatedPost ?? null
-  } catch (error) {
-    console.error(`更新文章 (ID: ${id}) 错误:`, error)
-    return null
-  }
-}
-
-/**
- * 删除文章
- */
-export async function deletePost(id: string): Promise<boolean> {
-  if (!process.env.DATABASE_URL) {
-    console.warn("DATABASE_URL is not set. Cannot delete post.")
-    return false
-  }
-  try {
-    const result = await sql`
-      DELETE FROM posts
-      WHERE id = ${id}
-    `
-    return result.count > 0
-  } catch (error) {
-    console.error(`删除文章 (ID: ${id}) 错误:`, error)
-    return false
-  }
-}
-
-/**
- * 将 Markdown 转换为 HTML
- */
-export async function markdownToHtml(markdown: string): Promise<string> {
-  const result = await remark().use(html).process(markdown)
-  return result.toString()
-}
-
-/**
- * 从 Markdown 提取摘要
- */
-export function extractExcerpt(markdown: string, maxLength = 150): string {
-  const text = remark().use(stripMarkdown).processSync(markdown).toString()
-  if (text.length <= maxLength) {
-    return text
-  }
-  return text.substring(0, maxLength).trim() + "..."
-}
-
-/**
- * 生成文章 slug
- */
+// 辅助函数：生成 slug
 export function generateSlug(title: string): string {
   return title
     .toLowerCase()
-    .replace(/[^\w\s-]/g, "") // 移除所有非单词字符、空格和连字符
-    .replace(/\s+/g, "-") // 将空格替换为单个连字符
-    .replace(/-+/g, "-") // 将多个连字符替换为单个连字符
-    .trim() // 移除首尾空格
+    .replace(/[^\w\s-]/g, "") // 移除特殊字符
+    .replace(/\s+/g, "-") // 空格替换为连字符
+    .replace(/-+/g, "-") // 多个连字符替换为单个
+    .trim() // 去除首尾空格
+}
+
+// 辅助函数：将 Markdown 转换为 HTML
+export function markdownToHtml(markdown: string): string {
+  const html = marked.parse(markdown)
+  return DOMPurify.sanitize(html as string)
+}
+
+// 辅助函数：提取纯文本摘要
+export function extractExcerpt(content: string, length = 160): string {
+  const plainText = content.replace(/<\/?[^>]+(>|$)/g, "") // 移除 HTML 标签
+  return plainText.substring(0, length) + (plainText.length > length ? "..." : "")
 }

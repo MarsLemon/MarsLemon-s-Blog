@@ -1,4 +1,4 @@
-import type { NextRequest, NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 import { getSessionUser, type User } from "./auth"
 
 export async function verifyAdminToken(request: NextRequest): Promise<boolean> {
@@ -30,18 +30,12 @@ export async function getCurrentUser(request: NextRequest) {
   }
 }
 
-export async function verifyToken(request: NextRequest): Promise<User | NextResponse> {
+export async function verifyToken(request: NextRequest): Promise<User | null> {
   const sessionToken = request.cookies.get("session-token")?.value
 
   if (!sessionToken) {
-    return NextResponse.json({ message: "未授权" }, { status: 401 })
+    return null
   }
 
-  const user = await getSessionUser(sessionToken)
-
-  if (!user) {
-    return NextResponse.json({ message: "未授权" }, { status: 401 })
-  }
-
-  return user
+  return await getSessionUser(sessionToken)
 }

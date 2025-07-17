@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { useUser } from "@/lib/user-context" // 确保导入 useUser
+import { useUser } from "@/lib/user-context"
 
 export default function LoginForm() {
   const [identifier, setIdentifier] = useState("") // 可以是用户名或邮箱
@@ -16,7 +17,7 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const { refreshUser } = useUser() // 使用 useUser 提供的 refreshUser
+  const { refreshUser } = useUser()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,7 +40,7 @@ export default function LoginForm() {
           description: "您已成功登录。",
         })
         refreshUser() // 刷新用户上下文
-        router.push("/admin") // 登录成功后跳转到管理后台
+        router.push("/") // 登录成功后跳转到首页
       } else {
         toast({
           title: "登录失败",
@@ -97,7 +98,7 @@ export default function LoginForm() {
       <CardFooter className="text-center text-sm text-muted-foreground">
         <p>
           没有账户？
-          <a className="underline" href="/admin/register">
+          <a className="underline" href="/register">
             注册
           </a>
         </p>

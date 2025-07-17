@@ -97,8 +97,8 @@ export default function AdminDashboard() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Blog Admin</h1>
-            <p className="text-muted-foreground">Manage your blog posts</p>
+            <h1 className="text-3xl font-bold">管理员页面</h1>
+            <p className="text-muted-foreground">编辑你的博客</p>
           </div>
           <div className="flex gap-2">
             <Button onClick={() => router.push("/admin/posts/new")}>

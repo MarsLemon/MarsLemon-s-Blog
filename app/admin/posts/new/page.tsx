@@ -27,7 +27,7 @@ export default function NewPostPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">创建新文章</h1>
       <PostEditor onSave={handleSave} />
     </div>
