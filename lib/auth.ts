@@ -2,10 +2,11 @@ import { SignJWT, jwtVerify } from "jose"
 import { cookies } from "next/headers"
 import { neon } from "@neondatabase/serverless"
 import bcrypt from "bcryptjs"
+import {env} from "@/lib/env"
 
-const sql = neon(process.env.DATABASE_URL!)
+const sql = neon(env.DATABASE_URL!)
 
-const secretKey = process.env.JWT_SECRET || "default_secret_key_for_dev_only_please_change_this_in_prod"
+const secretKey = env.JWT_SECRET || "default_secret_key_for_dev_only_please_change_this_in_prod"
 const encodedKey = new TextEncoder().encode(secretKey)
 
 export interface User {
@@ -45,7 +46,7 @@ export async function createSession(userId: number, username: string, email: str
 
   cookies().set("session-token", session, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     expires: expiresAt,
     sameSite: "lax",
     path: "/",
