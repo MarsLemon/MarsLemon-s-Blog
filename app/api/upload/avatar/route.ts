@@ -3,8 +3,9 @@ import { put } from "@vercel/blob"
 import { verifyToken, updateUserAvatar } from "@/lib/auth"
 import { getFileHash } from "@/lib/file-hash"
 import { neon } from "@neondatabase/serverless"
+import {env} from "@/lib/env"
 
-const sql = neon(process.env.DATABASE_URL!)
+const sql = neon(env.DATABASE_URL!)
 
 export async function POST(request: NextRequest) {
   try {
