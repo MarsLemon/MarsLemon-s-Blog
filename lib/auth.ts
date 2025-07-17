@@ -41,8 +41,8 @@ export async function decrypt(session: string | undefined = ""): Promise<any | n
 }
 
 export async function createSession(userId: number, username: string, email: string, isAdmin: boolean) {
-  const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 hours
-  const session = await encrypt({ userId, username, email, isAdmin, expiresAt })
+  const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours
+  const session = await encrypt({ userId, username, email, isAdmin, expiresAt });
 
   (await cookies()).set("session-token", session, {
     httpOnly: true,
@@ -58,7 +58,7 @@ export async function deleteSession() {
 }
 
 export async function getSessionUser(): Promise<User | null> {
-  const session =(await cookies()).get("session-token")?.value
+  const session =(await cookies()).get("session-token")?.value;
   if (!session) return null
 
   const payload = await decrypt(session)
