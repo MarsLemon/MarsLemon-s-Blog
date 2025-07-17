@@ -4,4 +4,4 @@ export const localEnv = {
 
 }
 
-export const env =process.env.NODE_ENV === "production"? process.env:
+export const env =process.env.NODE_ENV === "production"? process.env:localEnv
