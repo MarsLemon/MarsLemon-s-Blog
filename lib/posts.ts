@@ -1,7 +1,8 @@
 import { neon } from "@neondatabase/serverless"
 
-const sql = neon(process.env.DATABASE_URL!)
+import { env } from "@/lib/env";
 
+const sql = neon(env.DATABASE_URL!);
 export interface Post {
   id: number
   title: string
