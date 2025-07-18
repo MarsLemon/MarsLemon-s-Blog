@@ -2,11 +2,10 @@ import { SignJWT, jwtVerify } from "jose"
 import { cookies } from "next/headers"
 import { neon } from "@neondatabase/serverless"
 import bcrypt from "bcryptjs"
-import {env} from "@/lib/env"
 
-const sql = neon(env.DATABASE_URL!)
+const sql = neon(process.env.DATABASE_URL!)
 
-const secretKey = env.JWT_SECRET || "default_secret_key_for_dev_only_please_change_this_in_prod"
+const secretKey = process.env.JWT_SECRET || "default_secret_key_for_dev_only_please_change_this_in_prod"
 const encodedKey = new TextEncoder().encode(secretKey)
 
 export interface User {
@@ -41,12 +40,12 @@ export async function decrypt(session: string | undefined = ""): Promise<any | n
 }
 
 export async function createSession(userId: number, username: string, email: string, isAdmin: boolean) {
-  const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours
-  const session = await encrypt({ userId, username, email, isAdmin, expiresAt });
+  const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 hours
+  const session = await encrypt({ userId, username, email, isAdmin, expiresAt })
 
-  (await cookies()).set("session-token", session, {
+  cookies().set("session-token", session, {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production",
     expires: expiresAt,
     sameSite: "lax",
     path: "/",
@@ -54,11 +53,11 @@ export async function createSession(userId: number, username: string, email: str
 }
 
 export async function deleteSession() {
-  (await cookies()).delete("session-token")
+  cookies().delete("session-token")
 }
 
 export async function getSessionUser(): Promise<User | null> {
-  const session =(await cookies()).get("session-token")?.value;
+  const session = cookies().get("session-token")?.value
   if (!session) return null
 
   const payload = await decrypt(session)

@@ -2,9 +2,8 @@ import { type NextRequest, NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 import { verifyToken } from "@/lib/verify-token"
 import { generateSlug, extractExcerpt } from "@/lib/posts"
-import { env } from "@/lib/env"
 
-const sql = neon(env.DATABASE_URL!)
+const sql = neon(process.env.DATABASE_URL!)
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -13,7 +12,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ message: "需要管理员权限" }, { status: 403 })
     }
 
-    const postId = Number.parseInt(await params.id)
+    const postId = Number.parseInt(params.id)
     if (isNaN(postId)) {
       return NextResponse.json({ message: "无效的文章ID" }, { status: 400 })
     }
@@ -45,16 +44,16 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ message: "需要管理员权限" }, { status: 403 })
     }
 
-    const postId = Number.parseInt(await params.id)
+    const postId = Number.parseInt(params.id)
     if (isNaN(postId)) {
       return NextResponse.json({ message: "无效的文章ID" }, { status: 400 })
     }
 
     const body = await request.json()
-    const { title, content, cover_image, published, is_featured, is_pinned, only_change_publish } = body
+    const { title, content, cover_image, published, is_featured, is_pinned ,only_change_publish} = body
 
-    if (only_change_publish) {
-      // 更新文章发布状态
+    if(only_change_publish){
+     // 更新文章发布状态
       const result = await sql`
         UPDATE posts SET    
           published = ${published || false},    

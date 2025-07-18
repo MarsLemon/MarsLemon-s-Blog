@@ -1,11 +1,11 @@
 import { neon } from "@neondatabase/serverless"
-import {env} from "@/lib/env"
+
 /**
  * A thin wrapper around the Neon serverless SQL client.
  * Make sure you set the NEON database connection string in your
  * environment variables as DATABASE_URL.
  */
-export const sql = neon(env.DATABASE_URL as string)
+export const sql = neon(process.env.DATABASE_URL as string)
 
 /**
  * Post table row type.

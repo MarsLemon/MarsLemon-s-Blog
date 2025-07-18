@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
+import { useUser } from "@/lib/user-context"
 
 export default function RegisterForm() {
   const [username, setUsername] = useState("")
@@ -17,6 +18,7 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+  const { refreshUser } = useUser()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,6 +40,7 @@ export default function RegisterForm() {
           title: "注册成功",
           description: "您已成功注册并登录。",
         })
+        refreshUser() // 刷新用户上下文
         router.push("/") // 注册成功后跳转到首页
       } else {
         toast({
@@ -59,61 +62,59 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-gray-100 px-4 dark:bg-gray-950">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">注册</CardTitle>
-          <CardDescription>创建一个新账户。</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">用户名</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="请输入用户名"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">邮箱</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="请输入邮箱"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">密码</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="请输入密码"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "注册中..." : "注册"}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="text-center text-sm text-muted-foreground">
-          <p>
-            已有账户？
-            <a className="underline" href="/login">
-              登录
-            </a>
-          </p>
-        </CardFooter>
-      </Card>
-    </div>
+    <Card className="w-full max-w-md">
+      <CardHeader className="space-y-1 text-center">
+        <CardTitle className="text-2xl font-bold">注册</CardTitle>
+        <CardDescription>创建一个新账户。</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="username">用户名</Label>
+            <Input
+              id="username"
+              type="text"
+              placeholder="请输入用户名"
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">邮箱</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="请输入邮箱"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">密码</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="请输入密码"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "注册中..." : "注册"}
+          </Button>
+        </form>
+      </CardContent>
+      <CardFooter className="text-center text-sm text-muted-foreground">
+        <p>
+          已有账户？
+          <a className="underline" href="/login">
+            登录
+          </a>
+        </p>
+      </CardFooter>
+    </Card>
   )
 }

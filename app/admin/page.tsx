@@ -69,7 +69,7 @@ export default function AdminPage() {
         },
         body: JSON.stringify({
           published: !currentStatus,
-          only_change_publish: true,
+          only_change_publish:true,
         }),
       })
 

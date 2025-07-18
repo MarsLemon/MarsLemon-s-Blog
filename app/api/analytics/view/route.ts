@@ -1,9 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 import { verifyToken } from "@/lib/verify-token"
-import { env } from "@/lib/env"
 
-const sql = neon(env.DATABASE_URL!)
+const sql = neon(process.env.DATABASE_URL!)
 
 export async function POST(request: NextRequest) {
   try {

@@ -2,7 +2,6 @@ import { notFound } from "next/navigation"
 import { PostEditor } from "@/components/admin/post-editor"
 import { getPostById } from "@/lib/posts"
 import { redirect } from "next/navigation"
-import { env } from "@/lib/env"
 
 interface EditPostPageProps {
   params: {
@@ -11,7 +10,7 @@ interface EditPostPageProps {
 }
 
 export default async function EditPostPage({ params }: EditPostPageProps) {
-  const postId = Number.parseInt((await params).id)
+  const postId = Number.parseInt(params.id)
 
   if (isNaN(postId)) {
     notFound()
@@ -27,13 +26,16 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
     "use server"
 
     try {
-      const response = await fetch(`${env.NEXT_PUBLIC_BASE_URL}/api/admin/posts/${postId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `/api/admin/posts/${postId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(postData),
         },
-        body: JSON.stringify(postData),
-      })
+      )
 
       if (!response.ok) {
         const errorData = await response.json()

@@ -8,7 +8,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
+import { useUser } from "@/lib/user-context"
 
 export default function LoginForm() {
   const [identifier, setIdentifier] = useState("") // 可以是用户名或邮箱
@@ -16,6 +17,7 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+  const { refreshUser } = useUser()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,8 +37,9 @@ export default function LoginForm() {
       if (response.ok) {
         toast({
           title: "登录成功",
-          description: "您已成功登录。",
+          description: `欢迎回来，${data.user?.username || "用户"}！`,
         })
+        refreshUser() // 刷新用户上下文
         router.push("/") // 登录成功后跳转到首页
       } else {
         toast({
@@ -58,50 +61,48 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-gray-100 px-4 dark:bg-gray-950">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">登录</CardTitle>
-          <CardDescription>输入您的用户名/邮箱和密码以登录。</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="identifier">用户名或邮箱</Label>
-              <Input
-                id="identifier"
-                type="text"
-                placeholder="请输入用户名或邮箱"
-                required
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">密码</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="请输入密码"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "登录中..." : "登录"}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="text-center text-sm text-muted-foreground">
-          <p>
-            没有账户？
-            <a className="underline" href="/register">
-              注册
-            </a>
-          </p>
-        </CardFooter>
-      </Card>
-    </div>
+    <Card className="w-full max-w-md">
+      <CardHeader className="space-y-1 text-center">
+        <CardTitle className="text-2xl font-bold">登录</CardTitle>
+        <CardDescription>输入您的用户名/邮箱和密码以登录。</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="identifier">用户名或邮箱</Label>
+            <Input
+              id="identifier"
+              type="text"
+              placeholder="请输入用户名或邮箱"
+              required
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">密码</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="请输入密码"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "登录中..." : "登录"}
+          </Button>
+        </form>
+      </CardContent>
+      <CardFooter className="text-center text-sm text-muted-foreground">
+        <p>
+          没有账户？
+          <a className="underline" href="/register">
+            注册
+          </a>
+        </p>
+      </CardFooter>
+    </Card>
   )
 }

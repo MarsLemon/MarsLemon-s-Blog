@@ -1,7 +1,6 @@
 import { neon } from "@neondatabase/serverless"
-import {env} from "@/lib/env"
 
-const sql = neon(env.DATABASE_URL!)
+const sql = neon(process.env.DATABASE_URL!)
 
 export interface Post {
   id: number
@@ -22,7 +21,7 @@ export interface Post {
 
 export async function getAllPosts(): Promise<Post[]> {
   try {
-    if (!env.DATABASE_URL) {
+    if (!process.env.DATABASE_URL) {
       console.warn("DATABASE_URL not found, returning empty posts array")
       return []
     }
@@ -46,7 +45,7 @@ export async function getAllPosts(): Promise<Post[]> {
 
 export async function getFeaturedPost(): Promise<Post | null> {
   try {
-    if (!env.DATABASE_URL) {
+    if (!process.env.DATABASE_URL) {
       return null
     }
 
@@ -70,7 +69,7 @@ export async function getFeaturedPost(): Promise<Post | null> {
 
 export async function getRecentPosts(limit = 5): Promise<Post[]> {
   try {
-    if (!env.DATABASE_URL) {
+    if (!process.env.DATABASE_URL) {
       return []
     }
 
@@ -94,7 +93,7 @@ export async function getRecentPosts(limit = 5): Promise<Post[]> {
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   try {
-    if (!env.DATABASE_URL) {
+    if (!process.env.DATABASE_URL) {
       return null
     }
 
@@ -116,7 +115,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
 export async function getPostById(id: number): Promise<Post | null> {
   try {
-    if (!env.DATABASE_URL) {
+    if (!process.env.DATABASE_URL) {
       return null
     }
 
