@@ -3,6 +3,7 @@ import { PostEditor } from "@/components/admin/post-editor";
 import { getPostById } from "@/lib/posts";
 import { redirect } from "next/navigation";
 import { env } from "@/lib/env";
+import { cookies } from "next/headers";
 
 interface EditPostPageProps {
   params: {
@@ -33,6 +34,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Cookie: await cookies().toString(),
           },
           body: JSON.stringify(postData),
         }
