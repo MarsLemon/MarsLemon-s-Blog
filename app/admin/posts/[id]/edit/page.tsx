@@ -1,57 +1,58 @@
-import { notFound } from "next/navigation"
-import { PostEditor } from "@/components/admin/post-editor"
-import { getPostById } from "@/lib/posts"
-import { redirect } from "next/navigation"
+import { notFound } from "next/navigation";
+import { PostEditor } from "@/components/admin/post-editor";
+import { getPostById } from "@/lib/posts";
+import { redirect } from "next/navigation";
+import { env } from "@/lib/env";
 
 interface EditPostPageProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 export default async function EditPostPage({ params }: EditPostPageProps) {
-  const postId = Number.parseInt(params.id)
+  const postId = Number.parseInt((await params).id);
 
   if (isNaN(postId)) {
-    notFound()
+    notFound();
   }
 
-  const post = await getPostById(postId)
+  const post = await getPostById(postId);
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
   const handleSave = async (postData: any) => {
-    "use server"
+    "use server";
 
     try {
       const response = await fetch(
-      `${env.NEXT_PUBLIC_BASE_URL}/api/admin/posts/${postId}`,
+        `${env.NEXT_PUBLIC_BASE_URL}/api/admin/posts/${postId}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(postData),
-        },
-      )
+        }
+      );
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "更新文章失败")
+        const errorData = await response.json();
+        throw new Error(errorData.message || "更新文章失败");
       }
 
-      redirect("/admin")
+      redirect("/admin");
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">编辑文章</h1>
       <PostEditor post={post} onSave={handleSave} />
     </div>
-  )
+  );
 }

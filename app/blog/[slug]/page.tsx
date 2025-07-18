@@ -1,16 +1,20 @@
-import { getPostBySlug, markdownToHtml } from "@/lib/posts"
-import { notFound } from "next/navigation"
-import Image from "next/image"
-import { ViewTracker } from "@/components/view-tracker"
+import { getPostBySlug, markdownToHtml } from "@/lib/posts";
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import { ViewTracker } from "@/components/view-tracker";
 
-export default async function PostPage({ params }: { params: { slug: string } }) {
-  const post = await getPostBySlug(params.slug)
+export default async function PostPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const post = await getPostBySlug((await params).slug);
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
-  const contentHtml = markdownToHtml(post.content)
+  const contentHtml = markdownToHtml(post.content);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -42,7 +46,11 @@ export default async function PostPage({ params }: { params: { slug: string } })
           <span>{post.author_name || "匿名作者"}</span>
           <span className="mx-2">·</span>
           <span>
-            {new Date(post.created_at).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" })}
+            {new Date(post.created_at).toLocaleDateString("zh-CN", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </span>
           {post.view_count && (
             <>
@@ -57,5 +65,5 @@ export default async function PostPage({ params }: { params: { slug: string } })
         />
       </article>
     </div>
-  )
+  );
 }
