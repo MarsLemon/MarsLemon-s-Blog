@@ -8,7 +8,8 @@ interface ViewTrackerProps {
 
 export function ViewTracker({ postId }: ViewTrackerProps) {
   useEffect(() => {
-    const trackView = async () => {
+    // 记录访问
+    const recordView = async () => {
       try {
         await fetch("/api/analytics/view", {
           method: "POST",
@@ -18,12 +19,12 @@ export function ViewTracker({ postId }: ViewTrackerProps) {
           body: JSON.stringify({ postId }),
         })
       } catch (error) {
-        console.error("Failed to track view:", error)
+        console.error("记录访问失败:", error)
       }
     }
 
-    trackView()
+    recordView()
   }, [postId])
 
-  return null // This component doesn't render anything
+  return null
 }

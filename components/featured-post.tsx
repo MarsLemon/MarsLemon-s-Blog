@@ -26,7 +26,7 @@ export function FeaturedPost({ post }: FeaturedPostProps) {
           <div className="relative aspect-video md:aspect-auto md:h-full">
             {post.cover_image && (
               <Image
-                src={post.cover_image || "/placeholder.png"}
+                src={post.cover_image || "/placeholder.svg"}
                 alt={post.title}
                 fill
                 className="object-cover"
@@ -51,7 +51,7 @@ export function FeaturedPost({ post }: FeaturedPostProps) {
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <div className="flex items-center space-x-2">
                   <Avatar className="w-8 h-8">
-                    <AvatarImage src={post.author_avatar || "/placeholder-user.png"} />
+                    <AvatarImage src={post.author_avatar || "/placeholder-user.jpg"} />
                     <AvatarFallback>{post.author_name.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <span>{post.author_name}</span>

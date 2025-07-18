@@ -19,7 +19,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
         {post.cover_image && (
           <div className="mb-8">
             <Image
-              src={post.cover_image || "/placeholder.png"}
+              src={post.cover_image || "/placeholder.svg"}
               alt={post.title}
               width={1200}
               height={600}
@@ -32,7 +32,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
         <div className="flex items-center text-muted-foreground text-sm mb-8">
           {post.author_avatar && (
             <Image
-              src={post.author_avatar || "/placeholder.png"}
+              src={post.author_avatar || "/placeholder.svg"}
               alt={post.author_name || "作者"}
               width={32}
               height={32}

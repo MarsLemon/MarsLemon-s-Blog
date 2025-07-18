@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useEffect, useState, useCallback } from "react"
-import { useRouter } from "next/navigation"
+import { createContext, useContext, useEffect, useState } from "react"
 
 export interface User {
   id: number
@@ -12,15 +11,14 @@ export interface User {
   is_admin: boolean
   is_verified: boolean
   created_at?: string
-  two_factor_enabled?: boolean // Add this field for 2FA status
 }
 
 interface UserContextType {
   user: User | null
   loading: boolean
-  login: (userData: User) => void
-  logout: () => Promise<void>
   refreshUser: () => Promise<void>
+  logout: () => Promise<void>
+  updateAvatar: (file: File) => Promise<void>
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -28,9 +26,8 @@ const UserContext = createContext<UserContextType | undefined>(undefined)
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
 
-  const fetchUser = useCallback(async () => {
+  const refreshUser = async () => {
     try {
       const response = await fetch("/api/auth/me", {
         credentials: "include",
@@ -54,43 +51,49 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }
 
-  useEffect(() => {
-    fetchUser()
-  }, [fetchUser])
-
-  const login = useCallback((userData: User) => {
-    setUser(userData)
-    setLoading(false)
-  }, [])
-
-  const logout = useCallback(async () => {
-    setLoading(true)
+  const logout = async () => {
     try {
-      const response = await fetch("/api/auth/logout", {
+      await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
       })
-      if (response.ok) {
-        setUser(null)
-        router.push("/login")
-      } else {
-        console.error("登出失败")
-      }
+      setUser(null)
     } catch (error) {
-      console.error("登出错误:", error)
-    } finally {
-      setLoading(false)
+      console.error("登出失败:", error)
     }
-  }, [router])
+  }
 
-  const refreshUser = useCallback(async () => {
-    setLoading(true)
-    await fetchUser()
-  }, [fetchUser])
+  const updateAvatar = async (file: File) => {
+    const formData = new FormData()
+    formData.append("file", file)
 
-  return <UserContext.Provider value={{ user, loading, login, logout, refreshUser }}>{children}</UserContext.Provider>
+    const response = await fetch("/api/upload/avatar", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      // 更新用户头像URL
+      if (user) {
+        setUser({ ...user, avatar_url: data.avatarUrl })
+      }
+    } else {
+      throw new Error(data.message || "头像上传失败")
+    }
+  }
+
+  useEffect(() => {
+    refreshUser()
+  }, [])
+
+  return (
+    <UserContext.Provider value={{ user, loading, refreshUser, logout, updateAvatar }}>{children}</UserContext.Provider>
+  )
 }
 
 export function useUser() {

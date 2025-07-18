@@ -1,53 +1,41 @@
 import type { NextRequest } from "next/server"
-import jwt from "jsonwebtoken"
-import { env } from "@/lib/env"
-import { neon } from "@neondatabase/serverless"
+import { getSessionUser, type User } from "./auth"
 
-const sql = neon(env.DATABASE_URL!)
-const JWT_SECRET = env.JWT_SECRET!
-
-interface DecodedToken {
-  userId: number
-  username: string
-  email: string
-  isAdmin: boolean
-  iat: number
-  exp: number
-}
-
-interface SessionUser {
-  id: number
-  username: string
-  email: string
-  avatar_url?: string | null
-  is_admin: boolean
-  is_verified: boolean
-  created_at?: string
-}
-
-export async function verifyToken(request: NextRequest): Promise<SessionUser | null> {
-  const token = request.cookies.get("token")?.value
-
-  if (!token) {
-    return null
-  }
-
+export async function verifyAdminToken(request: NextRequest): Promise<boolean> {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken
+    const sessionToken = request.cookies.get("session-token")?.value
 
-    const users = await sql`
-      SELECT id, username, email, avatar_url, is_admin, is_verified, created_at
-      FROM users
-      WHERE id = ${decoded.userId}
-    `
+    if (!sessionToken) {
+      return false
+    }
 
-    if (users.length === 0) {
+    const user = await getSessionUser(sessionToken)
+    return user?.is_admin === true
+  } catch (error) {
+    return false
+  }
+}
+
+export async function getCurrentUser(request: NextRequest) {
+  try {
+    const sessionToken = request.cookies.get("session-token")?.value
+
+    if (!sessionToken) {
       return null
     }
 
-    return users[0] as SessionUser
+    return await getSessionUser(sessionToken)
   } catch (error) {
-    console.error("Token verification failed:", error)
     return null
   }
+}
+
+export async function verifyToken(request: NextRequest): Promise<User | null> {
+  const sessionToken = request.cookies.get("session-token")?.value
+
+  if (!sessionToken) {
+    return null
+  }
+
+  return await getSessionUser(sessionToken)
 }

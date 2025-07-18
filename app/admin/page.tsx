@@ -155,7 +155,7 @@ export default function AdminPage() {
                 {post.cover_image && (
                   <div className="w-48 h-32 flex-shrink-0">
                     <img
-                      src={post.cover_image || "/placeholder.png"}
+                      src={post.cover_image || "/placeholder.svg"}
                       alt={post.title}
                       className="w-full h-full object-cover"
                     />

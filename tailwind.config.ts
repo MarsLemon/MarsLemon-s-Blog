@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss"
+import { fontFamily } from "tailwindcss/defaultTheme"
 
 const config = {
   darkMode: ["class"],
@@ -58,6 +59,55 @@ const config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", ...fontFamily.sans],
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: "100%",
+            color: "var(--tw-prose-body)",
+            a: {
+              color: "var(--tw-prose-links)",
+              "&:hover": {
+                color: "var(--tw-prose-links-hover)",
+              },
+            },
+            h2: {
+              marginTop: "2em",
+              marginBottom: "1em",
+            },
+            h3: {
+              marginTop: "1.5em",
+              marginBottom: "0.75em",
+            },
+            code: {
+              color: "var(--tw-prose-code)",
+              backgroundColor: "var(--tw-prose-code-bg)",
+              padding: "0.2em 0.4em",
+              borderRadius: "0.25rem",
+              fontWeight: "500",
+            },
+            "code::before": {
+              content: '""',
+            },
+            "code::after": {
+              content: '""',
+            },
+            pre: {
+              backgroundColor: "var(--tw-prose-pre-bg)",
+              borderRadius: "0.375rem",
+              padding: "1em",
+              overflow: "auto",
+            },
+            "pre code": {
+              backgroundColor: "transparent",
+              padding: "0",
+              fontWeight: "inherit",
+            },
+          },
+        },
       },
       keyframes: {
         "accordion-down": {
