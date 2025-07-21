@@ -98,8 +98,7 @@ export default function SettingsPage() {
         setMessage(data.message || "密码修改失败")
       }
     } catch (error) {
-      setMessage("网络错误，请稍后重试")
-          toast({
+      toast({
         title: "错误",
         description: "网络错误，请稍后重试",
         variant: "destructive",
