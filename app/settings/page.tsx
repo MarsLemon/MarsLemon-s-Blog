@@ -92,10 +92,18 @@ export default function SettingsPage() {
       const data = await response.json()
       if (response.ok) {
         setMessage("密码修改成功")
+        toast({
+          title: "密码修改成功",
+          description: "",
+        })
         setIsPasswordDialogOpen(false)
         setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" })
       } else {
-        setMessage(data.message || "密码修改失败")
+        toast({
+          title: "错误",
+          description: data.message || "密码修改失败",
+          variant: "destructive",
+        })
       }
     } catch (error) {
       toast({
