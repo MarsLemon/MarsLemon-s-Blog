@@ -62,22 +62,29 @@ export default function SettingsPage() {
 
   const handleSaveSettings = () => {
     setMessage("设置已保存")
+    toast({
+        title: "设置已保存",
+        description:  "新密码和确认密码不匹配",
+      })
     setTimeout(() => setMessage(""), 3000)
   }
 
   const handlePasswordChange = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setMessage("新密码和确认密码不匹配")
+      toast({
+        title: "错误",
+        description:  "新密码和确认密码不匹配",
+        variant: "destructive",
+      })
       return
     }
 
     if (passwordForm.newPassword.length < 6) {
-      setMessage("新密码长度至少6位")
       toast({
-          title: "错误",
-          description:  "新密码长度至少6位",
-          variant: "destructive",
-        })
+        title: "错误",
+        description:  "新密码长度至少6位",
+        variant: "destructive",
+      })
       return
     }
 
