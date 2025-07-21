@@ -19,6 +19,7 @@ import {
 import { Settings, Moon, Sun, Monitor, Bell, Lock, Key, Shield } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
+import { useToast } from "@/hooks/use-toast"
 
 export default function SettingsPage() {
   const { user, loading, logout } = useUser()
@@ -26,6 +27,7 @@ export default function SettingsPage() {
   const [notifications, setNotifications] = useState(true)
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
   const [message, setMessage] = useState("")
+  const { toast } = useToast()
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
   const [isTwoFactorDialogOpen, setIsTwoFactorDialogOpen] = useState(false)
   const [passwordForm, setPasswordForm] = useState({
@@ -117,7 +119,12 @@ export default function SettingsPage() {
     // 这里应该实现真正的两步验证启用逻辑
     setTwoFactorEnabled(true)
     setIsTwoFactorDialogOpen(false)
-    setMessage("两步验证已启用")
+
+      toast({
+        title: "两步验证已启用",
+        description: "",
+        variant: "destructive",
+      })
   }
 
   return (
