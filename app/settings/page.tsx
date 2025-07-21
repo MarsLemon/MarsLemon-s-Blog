@@ -1,13 +1,19 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useUser } from "@/lib/user-context"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useState } from "react";
+import { useUser } from "@/lib/user-context";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -15,77 +21,86 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Settings, Moon, Sun, Monitor, Bell, Lock, Key, Shield } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useTheme } from "next-themes"
-import { useToast } from "@/hooks/use-toast"
+} from "@/components/ui/dialog";
+import {
+  Settings,
+  Moon,
+  Sun,
+  Monitor,
+  Bell,
+  Lock,
+  Key,
+  Shield,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SettingsPage() {
-  const { user, loading, logout } = useUser()
-  const { theme, setTheme } = useTheme()
-  const [notifications, setNotifications] = useState(true)
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
-  const { toast } = useToast()
-  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
-  const [isTwoFactorDialogOpen, setIsTwoFactorDialogOpen] = useState(false)
+  const { user, loading, logout } = useUser();
+  const { theme, setTheme } = useTheme();
+  const [notifications, setNotifications] = useState(true);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const { toast } = useToast();
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [isTwoFactorDialogOpen, setIsTwoFactorDialogOpen] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-  })
-  const [passwordLoading, setPasswordLoading] = useState(false)
-  const router = useRouter()
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const router = useRouter();
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div>加载中...</div>
       </div>
-    )
+    );
   }
 
   if (!user) {
-    router.push("/login")
-    return null
+    router.push("/login");
+    return null;
   }
 
   const handleLogout = async () => {
     try {
-      await logout()
-      router.push("/")
+      await logout();
+      router.push("/");
     } catch (error) {
-      console.error("退出登录失败:", error)
+      console.error("退出登录失败:", error);
     }
-  }
+  };
 
   const handleSaveSettings = () => {
     toast({
-        title: "设置已保存",
-        description:  "",
-    })
-  }
+      title: "设置已保存",
+      description: "",
+    });
+  };
 
   const handlePasswordChange = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       toast({
         title: "错误",
-        description:  "新密码和确认密码不匹配",
+        description: "新密码和确认密码不匹配",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (passwordForm.newPassword.length < 6) {
       toast({
         title: "错误",
-        description:  "新密码长度至少6位",
+        description: "新密码长度至少6位",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setPasswordLoading(true)
+    setPasswordLoading(true);
     try {
       const response = await fetch("/api/auth/change-password", {
         method: "POST",
@@ -96,57 +111,61 @@ export default function SettingsPage() {
           currentPassword: passwordForm.currentPassword,
           newPassword: passwordForm.newPassword,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (response.ok) {
         toast({
           title: "密码修改成功",
           description: "",
-        })
-        setIsPasswordDialogOpen(false)
-        setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" })
+        });
+        setIsPasswordDialogOpen(false);
+        setPasswordForm({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
       } else {
         toast({
           title: "错误",
           description: data.message || "密码修改失败",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
       toast({
         title: "错误",
         description: "网络错误，请稍后重试",
         variant: "destructive",
-      })
+      });
     } finally {
-      setPasswordLoading(false)
+      setPasswordLoading(false);
     }
-  }
+  };
 
   const handleTwoFactorToggle = () => {
     if (twoFactorEnabled) {
       // 禁用两步验证
-      setTwoFactorEnabled(false)
+      setTwoFactorEnabled(false);
       toast({
         title: "两步验证已禁用",
         description: "",
-      })
+      });
     } else {
       // 启用两步验证
-      setIsTwoFactorDialogOpen(true)
+      setIsTwoFactorDialogOpen(true);
     }
-  }
+  };
 
   const handleEnableTwoFactor = () => {
     // 这里应该实现真正的两步验证启用逻辑
-    setTwoFactorEnabled(true)
-    setIsTwoFactorDialogOpen(false)
+    setTwoFactorEnabled(true);
+    setIsTwoFactorDialogOpen(false);
     toast({
       title: "两步验证已启用",
       description: "",
-    })
-  }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -156,13 +175,6 @@ export default function SettingsPage() {
             <h1 className="text-3xl font-bold">设置</h1>
             <p className="text-muted-foreground">管理您的偏好设置</p>
           </div>
-
-          {message && (
-            <Alert className="mb-6">
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          )}
-
           <div className="space-y-6">
             {/* 外观设置 */}
             <Card>
@@ -219,9 +231,14 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>桌面通知</Label>
-                    <p className="text-sm text-muted-foreground">接收重要更新的桌面通知</p>
+                    <p className="text-sm text-muted-foreground">
+                      接收重要更新的桌面通知
+                    </p>
                   </div>
-                  <Switch checked={notifications} onCheckedChange={setNotifications} />
+                  <Switch
+                    checked={notifications}
+                    onCheckedChange={setNotifications}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -238,13 +255,21 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>当前登录状态</Label>
-                  <p className="text-sm text-muted-foreground">您已作为 {user.username} 登录</p>
+                  <p className="text-sm text-muted-foreground">
+                    您已作为 {user.username} 登录
+                  </p>
                 </div>
 
                 {/* 修改密码 */}
-                <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+                <Dialog
+                  open={isPasswordDialogOpen}
+                  onOpenChange={setIsPasswordDialogOpen}
+                >
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start bg-transparent">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start bg-transparent"
+                    >
                       <Key className="mr-2 h-4 w-4" />
                       修改密码
                     </Button>
@@ -252,7 +277,9 @@ export default function SettingsPage() {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>修改密码</DialogTitle>
-                      <DialogDescription>请输入当前密码和新密码</DialogDescription>
+                      <DialogDescription>
+                        请输入当前密码和新密码
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
@@ -261,7 +288,12 @@ export default function SettingsPage() {
                           id="current-password"
                           type="password"
                           value={passwordForm.currentPassword}
-                          onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                          onChange={(e) =>
+                            setPasswordForm({
+                              ...passwordForm,
+                              currentPassword: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div>
@@ -270,7 +302,12 @@ export default function SettingsPage() {
                           id="new-password"
                           type="password"
                           value={passwordForm.newPassword}
-                          onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                          onChange={(e) =>
+                            setPasswordForm({
+                              ...passwordForm,
+                              newPassword: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div>
@@ -279,14 +316,25 @@ export default function SettingsPage() {
                           id="confirm-password"
                           type="password"
                           value={passwordForm.confirmPassword}
-                          onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                          onChange={(e) =>
+                            setPasswordForm({
+                              ...passwordForm,
+                              confirmPassword: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div className="flex gap-2">
-                        <Button onClick={handlePasswordChange} disabled={passwordLoading}>
+                        <Button
+                          onClick={handlePasswordChange}
+                          disabled={passwordLoading}
+                        >
                           {passwordLoading ? "修改中..." : "确认修改"}
                         </Button>
-                        <Button variant="outline" onClick={() => setIsPasswordDialogOpen(false)}>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsPasswordDialogOpen(false)}
+                        >
                           取消
                         </Button>
                       </div>
@@ -295,7 +343,10 @@ export default function SettingsPage() {
                 </Dialog>
 
                 {/* 两步验证 */}
-                <Dialog open={isTwoFactorDialogOpen} onOpenChange={setIsTwoFactorDialogOpen}>
+                <Dialog
+                  open={isTwoFactorDialogOpen}
+                  onOpenChange={setIsTwoFactorDialogOpen}
+                >
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
@@ -309,15 +360,22 @@ export default function SettingsPage() {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>启用两步验证</DialogTitle>
-                      <DialogDescription>两步验证可以为您的账户提供额外的安全保护</DialogDescription>
+                      <DialogDescription>
+                        两步验证可以为您的账户提供额外的安全保护
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                       <p className="text-sm text-muted-foreground">
                         启用两步验证后，登录时除了密码外，还需要输入手机验证码。
                       </p>
                       <div className="flex gap-2">
-                        <Button onClick={handleEnableTwoFactor}>启用两步验证</Button>
-                        <Button variant="outline" onClick={() => setIsTwoFactorDialogOpen(false)}>
+                        <Button onClick={handleEnableTwoFactor}>
+                          启用两步验证
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsTwoFactorDialogOpen(false)}
+                        >
                           取消
                         </Button>
                       </div>
@@ -342,5 +400,5 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
