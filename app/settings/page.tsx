@@ -61,11 +61,10 @@ export default function SettingsPage() {
   }
 
   const handleSaveSettings = () => {
-    setMessage("设置已保存")
     toast({
         title: "设置已保存",
-        description:  "新密码和确认密码不匹配",
-      })
+        description:  "",
+    })
     setTimeout(() => setMessage(""), 3000)
   }
 
