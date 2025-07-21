@@ -99,6 +99,11 @@ export default function SettingsPage() {
       }
     } catch (error) {
       setMessage("网络错误，请稍后重试")
+          toast({
+        title: "错误",
+        description: "网络错误，请稍后重试",
+        variant: "destructive",
+      })
     } finally {
       setPasswordLoading(false)
     }
@@ -119,12 +124,10 @@ export default function SettingsPage() {
     // 这里应该实现真正的两步验证启用逻辑
     setTwoFactorEnabled(true)
     setIsTwoFactorDialogOpen(false)
-
-      toast({
-        title: "两步验证已启用",
-        description: "",
-        variant: "destructive",
-      })
+    toast({
+      title: "两步验证已启用",
+      description: "",
+    })
   }
 
   return (
