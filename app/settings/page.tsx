@@ -26,7 +26,6 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
   const [notifications, setNotifications] = useState(true)
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
-  const [message, setMessage] = useState("")
   const { toast } = useToast()
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
   const [isTwoFactorDialogOpen, setIsTwoFactorDialogOpen] = useState(false)
