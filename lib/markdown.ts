@@ -1,35 +1,37 @@
-import { marked } from "marked"
-import { markedHighlight } from "marked-highlight"
-import hljs from "highlight.js"
+import { marked } from "marked";
+import { markedHighlight } from "marked-highlight";
+import hljs from "highlight.js";
 
 // Configure marked with modern features
 marked.use(
   markedHighlight({
     langPrefix: "hljs language-",
     highlight(code, lang) {
-      const language = hljs.getLanguage(lang) ? lang : "plaintext"
-      return hljs.highlight(code, { language }).value
+      const language = hljs.getLanguage(lang) ? lang : "plaintext";
+      return hljs.highlight(code, { language }).value;
     },
-  }),
-)
+  })
+);
 
 // Custom renderer for enhanced features
-const renderer = new marked.Renderer()
+const renderer = new marked.Renderer();
 
 // Enhanced link rendering with external link handling
 renderer.link = (href, title, text) => {
-  const isExternal = href?.startsWith("http") && !href.includes(window?.location?.hostname || "")
-  const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : ""
-  const titleAttr = title ? ` title="${title}"` : ""
-  return `<a href="${href}"${titleAttr}${target}>${text}</a>`
-}
+  const isExternal =
+    href?.startsWith("http") &&
+    !href.includes(window?.location?.hostname || "");
+  const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : "";
+  const titleAttr = title ? ` title="${title}"` : "";
+  return `<a href="${href}"${titleAttr}${target}>${text}</a>`;
+};
 
 // Enhanced image rendering with lazy loading
 renderer.image = (href, title, text) => {
-  const titleAttr = title ? ` title="${title}"` : ""
-  const altAttr = text ? ` alt="${text}"` : ""
-  return `<img src="${href}"${altAttr}${titleAttr} loading="lazy" class="rounded-lg shadow-sm" />`
-}
+  const titleAttr = title ? ` title="${title}"` : "";
+  const altAttr = text ? ` alt="${text}"` : "";
+  return `<img src="${href}"${altAttr}${titleAttr} loading="lazy" class="rounded-lg shadow-sm" />`;
+};
 
 // Enhanced table rendering
 renderer.table = (header, body) => `<div class="overflow-x-auto my-6">
@@ -37,28 +39,32 @@ renderer.table = (header, body) => `<div class="overflow-x-auto my-6">
       <thead class="bg-gray-50 dark:bg-gray-800">${header}</thead>
       <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">${body}</tbody>
     </table>
-  </div>`
+  </div>`;
 
 // Enhanced blockquote rendering
 renderer.blockquote = (quote) =>
-  `<blockquote class="border-l-4 border-primary pl-4 py-2 my-4 bg-muted/50 rounded-r-lg italic">${quote}</blockquote>`
+  `<blockquote class="border-l-4 border-primary pl-4 py-2 my-4 bg-muted/50 rounded-r-lg italic">${quote}</blockquote>`;
 
 // Enhanced code block rendering
 renderer.code = (code, language) => {
-  const validLang = language && hljs.getLanguage(language) ? language : "plaintext"
-  const highlighted = hljs.highlight(code, { language: validLang }).value
+  const validLang =
+    language && hljs.getLanguage(language) ? language : "plaintext";
+  const highlighted = hljs.highlight(code, { language: validLang }).value;
 
   return `<div class="relative my-6">
     <div class="flex items-center justify-between bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-t-lg">
       <span class="text-sm font-medium text-gray-600 dark:text-gray-400">${validLang}</span>
-      <button onclick="navigator.clipboard.writeText(\`${code.replace(/`/g, "\\`")}\`)" 
+      <button onclick="navigator.clipboard.writeText(\`${code.replace(
+        /`/g,
+        "\\`"
+      )}\`)"
               class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
         Copy
       </button>
     </div>
     <pre class="bg-gray-900 text-gray-100 p-4 rounded-b-lg overflow-x-auto"><code class="hljs language-${validLang}">${highlighted}</code></pre>
-  </div>`
-}
+  </div>`;
+};
 
 // Configure marked options
 marked.setOptions({
@@ -68,7 +74,7 @@ marked.setOptions({
   pedantic: false,
   sanitize: false, // Allow HTML (be careful with user input)
   smartypants: true, // Use smart quotes and dashes
-})
+});
 
 // Extensions for additional features
 const extensions = [
@@ -77,26 +83,28 @@ const extensions = [
     name: "taskList",
     level: "block",
     start(src: string) {
-      return src.match(/^\s*[-*+] \[[ x]\]/)?.index
+      return src.match(/^\s*[-*+] \[[ x]\]/)?.index;
     },
     tokenizer(src: string) {
-      const rule = /^(\s*)([-*+]) \[([x ])\] (.+)$/gm
-      const match = rule.exec(src)
+      const rule = /^(\s*)([-*+]) \[([x ])\] (.+)$/gm;
+      const match = rule.exec(src);
       if (match) {
         return {
           type: "taskList",
           raw: match[0],
           checked: match[3] === "x",
           text: match[4],
-        }
+        };
       }
     },
     renderer(token: any) {
-      const checked = token.checked ? "checked" : ""
+      const checked = token.checked ? "checked" : "";
       return `<div class="flex items-center gap-2 my-1">
         <input type="checkbox" ${checked} disabled class="rounded" />
-        <span class="${token.checked ? "line-through text-gray-500" : ""}">${token.text}</span>
-      </div>`
+        <span class="${token.checked ? "line-through text-gray-500" : ""}">${
+        token.text
+      }</span>
+      </div>`;
     },
   },
 
@@ -105,27 +113,29 @@ const extensions = [
     name: "alert",
     level: "block",
     start(src: string) {
-      return src.match(/^> \[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]/)?.index
+      return src.match(/^> \[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]/)?.index;
     },
     tokenizer(src: string) {
-      const rule = /^> \[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n((?:> .*\n?)*)/m
-      const match = rule.exec(src)
+      const rule =
+        /^> \[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n((?:> .*\n?)*)/m;
+      const match = rule.exec(src);
       if (match) {
-        const type = match[1].toLowerCase()
-        const content = match[2].replace(/^> /gm, "").trim()
+        const type = match[1].toLowerCase();
+        const content = match[2].replace(/^> /gm, "").trim();
         return {
           type: "alert",
           raw: match[0],
           alertType: type,
           text: content,
-        }
+        };
       }
     },
     renderer(token: any) {
       const types = {
         note: {
           icon: "ℹ️",
-          class: "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200",
+          class:
+            "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200",
         },
         tip: {
           icon: "💡",
@@ -144,30 +154,33 @@ const extensions = [
         },
         caution: {
           icon: "🚨",
-          class: "bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200",
+          class:
+            "bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200",
         },
-      }
+      };
 
-      const config = types[token.alertType as keyof typeof types] || types.note
+      const config = types[token.alertType as keyof typeof types] || types.note;
 
       return `<div class="border-l-4 p-4 my-4 rounded-r-lg ${config.class}">
         <div class="flex items-start gap-2">
           <span class="text-lg">${config.icon}</span>
           <div class="flex-1">
-            <div class="font-semibold uppercase text-xs mb-1">${token.alertType}</div>
+            <div class="font-semibold uppercase text-xs mb-1">${
+              token.alertType
+            }</div>
             <div>${marked.parse(token.text)}</div>
           </div>
         </div>
-      </div>`
+      </div>`;
     },
   },
-]
+];
 
 // Add extensions to marked
-extensions.forEach((ext) => marked.use({ extensions: [ext] }))
+extensions.forEach((ext) => marked.use({ extensions: [ext] }));
 
 export function markdownToHtml(markdown: string): string {
-  return marked.parse(markdown)
+  return marked.parse(markdown);
 }
 
 export function extractExcerpt(content: string, length = 160): string {
@@ -184,7 +197,9 @@ export function extractExcerpt(content: string, length = 160): string {
     .replace(/^\s*\d+\.\s+/gm, "") // Remove numbered list markers
     .replace(/\n/g, " ") // Replace newlines with spaces
     .replace(/\s+/g, " ") // Normalize whitespace
-    .trim()
+    .trim();
 
-  return plainText.length > length ? plainText.substring(0, length) + "..." : plainText
+  return plainText.length > length
+    ? plainText.substring(0, length) + "..."
+    : plainText;
 }
