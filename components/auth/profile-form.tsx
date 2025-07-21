@@ -48,7 +48,7 @@ export function ProfileForm({ user, onSuccess }: ProfileFormProps) {
     } catch (error: any) {
       toast({
         title: "错误",
-        description: error.message || "Failed to update avatar",
+        description: error.message || "头像更新失败。",
         variant: "destructive",
       });
     } finally {
@@ -75,7 +75,7 @@ export function ProfileForm({ user, onSuccess }: ProfileFormProps) {
           disabled={loading}
         >
           <Upload className="mr-2 h-4 w-4" />
-          {loading ? "Uploading..." : "Change Avatar"}
+          {loading ? "上传中..." : "更换头像"}
         </Button>
 
         <input
@@ -89,24 +89,24 @@ export function ProfileForm({ user, onSuccess }: ProfileFormProps) {
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label>Username</Label>
+          <Label>用户名</Label>
           <Input value={user.username} disabled />
         </div>
 
         <div className="space-y-2">
-          <Label>Email</Label>
+          <Label>邮箱</Label>
           <Input value={user.email} disabled />
         </div>
 
         <div className="space-y-2">
-          <Label>Account Type</Label>
-          <Input value={user.is_admin ? "Administrator" : "User"} disabled />
+          <Label>账号类型</Label>
+          <Input value={user.is_admin ? "管理员" : "用户"} disabled />
         </div>
 
         <div className="space-y-2">
-          <Label>Member Since</Label>
+          <Label>注册日期</Label>
           <Input
-            value={new Date(user.created_at).toLocaleDateString("en-US", {
+            value={new Date(user.created_at).toLocaleDateString("zh-CN", {
               year: "numeric",
               month: "long",
               day: "numeric",
@@ -117,7 +117,7 @@ export function ProfileForm({ user, onSuccess }: ProfileFormProps) {
       </div>
 
       <Button onClick={onSuccess} className="w-full">
-        Close
+        关闭
       </Button>
     </div>
   );
