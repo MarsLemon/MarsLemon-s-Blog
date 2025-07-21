@@ -1,7 +1,7 @@
-import { getPostBySlug, markdownToHtml } from "@/lib/posts";
-import { notFound } from "next/navigation";
-import Image from "next/image";
-import { ViewTracker } from "@/components/view-tracker";
+import { getPostBySlug, markdownToHtml } from '@/lib/posts';
+import { notFound } from 'next/navigation';
+import Image from 'next/image';
+import { ViewTracker } from '@/components/view-tracker';
 
 export default async function PostPage({
   params,
@@ -23,7 +23,7 @@ export default async function PostPage({
         {post.cover_image && (
           <div className="mb-8">
             <Image
-              src={post.cover_image || "/placeholder.svg"}
+              src={post.cover_image || '/placeholder.svg'}
               alt={post.title}
               width={1200}
               height={600}
@@ -36,20 +36,20 @@ export default async function PostPage({
         <div className="flex items-center text-muted-foreground text-sm mb-8">
           {post.author_avatar && (
             <Image
-              src={post.author_avatar || "/placeholder.svg"}
-              alt={post.author_name || "作者"}
+              src={post.author_avatar || '/placeholder.svg'}
+              alt={post.author_name || '作者'}
               width={32}
               height={32}
               className="rounded-full mr-2"
             />
           )}
-          <span>{post.author_name || "匿名作者"}</span>
+          <span>{post.author_name || '匿名作者'}</span>
           <span className="mx-2">·</span>
           <span>
-            {new Date(post.created_at).toLocaleDateString("zh-CN", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
+            {new Date(post.created_at).toLocaleDateString('zh-CN', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
             })}
           </span>
           {post.view_count && (

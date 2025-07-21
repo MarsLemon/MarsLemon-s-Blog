@@ -1,9 +1,9 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { neon } from "@neondatabase/serverless";
-import { verifyToken } from "@/lib/verify-token";
-import { generateSlug, extractExcerpt } from "@/lib/posts";
+import { type NextRequest, NextResponse } from 'next/server';
+import { neon } from '@neondatabase/serverless';
+import { verifyToken } from '@/lib/verify-token';
+import { generateSlug, extractExcerpt } from '@/lib/posts';
 
-import { env } from "@/lib/env";
+import { env } from '@/lib/env';
 const sql = neon(env.DATABASE_URL!);
 
 export async function GET(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     // 验证管理员权限
     const user = await verifyToken(request);
     if (!user || !user.is_admin) {
-      return NextResponse.json({ message: "需要管理员权限" }, { status: 403 });
+      return NextResponse.json({ message: '需要管理员权限' }, { status: 403 });
     }
 
     // 获取所有文章（包括未发布的）
@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(posts);
   } catch (error) {
-    console.error("获取管理员文章列表错误:", error);
-    return NextResponse.json({ message: "获取文章列表失败" }, { status: 500 });
+    console.error('获取管理员文章列表错误:', error);
+    return NextResponse.json({ message: '获取文章列表失败' }, { status: 500 });
   }
 }
 
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     // 验证管理员权限
     const user = await verifyToken(request);
     if (!user || !user.is_admin) {
-      return NextResponse.json({ message: "需要管理员权限" }, { status: 403 });
+      return NextResponse.json({ message: '需要管理员权限' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     if (!title || !content) {
       return NextResponse.json(
-        { message: "标题和内容是必填项" },
+        { message: '标题和内容是必填项' },
         { status: 400 }
       );
     }
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     if (existingPost.length > 0) {
       return NextResponse.json(
-        { message: "文章标题已存在，请使用不同的标题" },
+        { message: '文章标题已存在，请使用不同的标题' },
         { status: 400 }
       );
     }
@@ -79,11 +79,11 @@ export async function POST(request: NextRequest) {
     `;
 
     return NextResponse.json({
-      message: "文章创建成功",
+      message: '文章创建成功',
       post: result[0],
     });
   } catch (error) {
-    console.error("创建文章错误:", error);
-    return NextResponse.json({ message: "创建文章失败" }, { status: 500 });
+    console.error('创建文章错误:', error);
+    return NextResponse.json({ message: '创建文章失败' }, { status: 500 });
   }
 }

@@ -1,13 +1,13 @@
-import { marked } from "marked";
-import { markedHighlight } from "marked-highlight";
-import hljs from "highlight.js";
+import { marked } from 'marked';
+import { markedHighlight } from 'marked-highlight';
+import hljs from 'highlight.js';
 
 // Configure marked with modern features
 marked.use(
   markedHighlight({
-    langPrefix: "hljs language-",
+    langPrefix: 'hljs language-',
     highlight(code, lang) {
-      const language = hljs.getLanguage(lang) ? lang : "plaintext";
+      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
       return hljs.highlight(code, { language }).value;
     },
   })
@@ -19,17 +19,17 @@ const renderer = new marked.Renderer();
 // Enhanced link rendering with external link handling
 renderer.link = (href, title, text) => {
   const isExternal =
-    href?.startsWith("http") &&
-    !href.includes(window?.location?.hostname || "");
-  const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : "";
-  const titleAttr = title ? ` title="${title}"` : "";
+    href?.startsWith('http') &&
+    !href.includes(window?.location?.hostname || '');
+  const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
+  const titleAttr = title ? ` title="${title}"` : '';
   return `<a href="${href}"${titleAttr}${target}>${text}</a>`;
 };
 
 // Enhanced image rendering with lazy loading
 renderer.image = (href, title, text) => {
-  const titleAttr = title ? ` title="${title}"` : "";
-  const altAttr = text ? ` alt="${text}"` : "";
+  const titleAttr = title ? ` title="${title}"` : '';
+  const altAttr = text ? ` alt="${text}"` : '';
   return `<img src="${href}"${altAttr}${titleAttr} loading="lazy" class="rounded-lg shadow-sm" />`;
 };
 
@@ -48,7 +48,7 @@ renderer.blockquote = (quote) =>
 // Enhanced code block rendering
 renderer.code = (code, language) => {
   const validLang =
-    language && hljs.getLanguage(language) ? language : "plaintext";
+    language && hljs.getLanguage(language) ? language : 'plaintext';
   const highlighted = hljs.highlight(code, { language: validLang }).value;
 
   return `<div class="relative my-6">
@@ -56,7 +56,7 @@ renderer.code = (code, language) => {
       <span class="text-sm font-medium text-gray-600 dark:text-gray-400">${validLang}</span>
       <button onclick="navigator.clipboard.writeText(\`${code.replace(
         /`/g,
-        "\\`"
+        '\\`'
       )}\`)"
               class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
         Copy
@@ -80,8 +80,8 @@ marked.setOptions({
 const extensions = [
   // Task list extension
   {
-    name: "taskList",
-    level: "block",
+    name: 'taskList',
+    level: 'block',
     start(src: string) {
       return src.match(/^\s*[-*+] \[[ x]\]/)?.index;
     },
@@ -90,28 +90,28 @@ const extensions = [
       const match = rule.exec(src);
       if (match) {
         return {
-          type: "taskList",
+          type: 'taskList',
           raw: match[0],
-          checked: match[3] === "x",
+          checked: match[3] === 'x',
           text: match[4],
         };
       }
     },
     renderer(token: any) {
-      const checked = token.checked ? "checked" : "";
+      const checked = token.checked ? 'checked' : '';
       return `<div class="flex items-center gap-2 my-1">
         <input type="checkbox" ${checked} disabled class="rounded" />
-        <span class="${token.checked ? "line-through text-gray-500" : ""}">${
-        token.text
-      }</span>
+        <span class="${token.checked ? 'line-through text-gray-500' : ''}">${
+          token.text
+        }</span>
       </div>`;
     },
   },
 
   // Alert/Callout extension
   {
-    name: "alert",
-    level: "block",
+    name: 'alert',
+    level: 'block',
     start(src: string) {
       return src.match(/^> \[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]/)?.index;
     },
@@ -121,9 +121,9 @@ const extensions = [
       const match = rule.exec(src);
       if (match) {
         const type = match[1].toLowerCase();
-        const content = match[2].replace(/^> /gm, "").trim();
+        const content = match[2].replace(/^> /gm, '').trim();
         return {
-          type: "alert",
+          type: 'alert',
           raw: match[0],
           alertType: type,
           text: content,
@@ -133,29 +133,29 @@ const extensions = [
     renderer(token: any) {
       const types = {
         note: {
-          icon: "ℹ️",
+          icon: 'ℹ️',
           class:
-            "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200",
+            'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200',
         },
         tip: {
-          icon: "💡",
+          icon: '💡',
           class:
-            "bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200",
+            'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200',
         },
         important: {
-          icon: "❗",
+          icon: '❗',
           class:
-            "bg-purple-50 border-purple-200 text-purple-800 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-200",
+            'bg-purple-50 border-purple-200 text-purple-800 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-200',
         },
         warning: {
-          icon: "⚠️",
+          icon: '⚠️',
           class:
-            "bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200",
+            'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200',
         },
         caution: {
-          icon: "🚨",
+          icon: '🚨',
           class:
-            "bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200",
+            'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200',
         },
       };
 
@@ -186,20 +186,20 @@ export function markdownToHtml(markdown: string): string {
 export function extractExcerpt(content: string, length = 160): string {
   // Remove markdown syntax and get plain text
   const plainText = content
-    .replace(/#{1,6}\s+/g, "") // Remove headers
-    .replace(/\*\*(.*?)\*\*/g, "$1") // Remove bold
-    .replace(/\*(.*?)\*/g, "$1") // Remove italic
-    .replace(/`(.*?)`/g, "$1") // Remove inline code
-    .replace(/\[(.*?)\]$$.*?$$/g, "$1") // Remove links
-    .replace(/!\[(.*?)\]$$.*?$$/g, "$1") // Remove images
-    .replace(/^>\s+/gm, "") // Remove blockquotes
-    .replace(/^\s*[-*+]\s+/gm, "") // Remove list markers
-    .replace(/^\s*\d+\.\s+/gm, "") // Remove numbered list markers
-    .replace(/\n/g, " ") // Replace newlines with spaces
-    .replace(/\s+/g, " ") // Normalize whitespace
+    .replace(/#{1,6}\s+/g, '') // Remove headers
+    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+    .replace(/\*(.*?)\*/g, '$1') // Remove italic
+    .replace(/`(.*?)`/g, '$1') // Remove inline code
+    .replace(/\[(.*?)\]$$.*?$$/g, '$1') // Remove links
+    .replace(/!\[(.*?)\]$$.*?$$/g, '$1') // Remove images
+    .replace(/^>\s+/gm, '') // Remove blockquotes
+    .replace(/^\s*[-*+]\s+/gm, '') // Remove list markers
+    .replace(/^\s*\d+\.\s+/gm, '') // Remove numbered list markers
+    .replace(/\n/g, ' ') // Replace newlines with spaces
+    .replace(/\s+/g, ' ') // Normalize whitespace
     .trim();
 
   return plainText.length > length
-    ? plainText.substring(0, length) + "..."
+    ? plainText.substring(0, length) + '...'
     : plainText;
 }

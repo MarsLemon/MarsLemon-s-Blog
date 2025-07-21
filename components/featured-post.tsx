@@ -1,32 +1,38 @@
-import Link from "next/link"
-import Image from "next/image"
-import { CalendarIcon } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import Link from 'next/link';
+import Image from 'next/image';
+import { CalendarIcon } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
 interface Author {
-  name: string
-  avatar: string
+  name: string;
+  avatar: string;
 }
 
 interface Post {
-  title: string
-  excerpt: string
-  date: string
-  author: Author
-  coverImage: string
-  slug: string
+  title: string;
+  excerpt: string;
+  date: string;
+  author: Author;
+  coverImage: string;
+  slug: string;
 }
 
 interface FeaturedPostProps {
-  post: Post
+  post: Post;
 }
 
 export function FeaturedPost({ post }: FeaturedPostProps) {
   return (
     <div className="relative overflow-hidden rounded-xl">
       <div className="relative h-[500px] w-full">
-        <Image src={post.coverImage || "/placeholder.svg"} alt={post.title} fill className="object-cover" priority />
+        <Image
+          src={post.coverImage || '/placeholder.svg'}
+          alt={post.title}
+          fill
+          className="object-cover"
+          priority
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/0" />
       </div>
       <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
@@ -40,11 +46,16 @@ export function FeaturedPost({ post }: FeaturedPostProps) {
           </div>
         </div>
         <h1 className="text-2xl md:text-4xl font-bold mb-3">{post.title}</h1>
-        <p className="text-sm md:text-base mb-6 max-w-2xl text-gray-200">{post.excerpt}</p>
+        <p className="text-sm md:text-base mb-6 max-w-2xl text-gray-200">
+          {post.excerpt}
+        </p>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={post.author?.avatar || "/placeholder.svg"} alt={post.author?.name} />
+              <AvatarImage
+                src={post.author?.avatar || '/placeholder.svg'}
+                alt={post.author?.name}
+              />
               <AvatarFallback>{post.author?.name?.charAt(0)}</AvatarFallback>
             </Avatar>
             <span className="text-sm font-medium">{post.author?.name}</span>
@@ -55,5 +66,5 @@ export function FeaturedPost({ post }: FeaturedPostProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,28 +1,43 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Github, Mail, Globe } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Github, Mail, Globe } from 'lucide-react';
 
 export default function AboutPage() {
-  const technologies = ["Next.js", "React", "TypeScript", "Tailwind CSS", "Node.js", "PostgreSQL", "Vercel", "Git"]
+  const technologies = [
+    'Next.js',
+    'React',
+    'TypeScript',
+    'Tailwind CSS',
+    'Node.js',
+    'PostgreSQL',
+    'Vercel',
+    'Git',
+  ];
 
   const features = [
     {
-      title: "现代化技术栈",
-      description: "使用最新的Web技术构建，确保最佳的性能和用户体验",
+      title: '现代化技术栈',
+      description: '使用最新的Web技术构建，确保最佳的性能和用户体验',
     },
     {
-      title: "响应式设计",
-      description: "完美适配各种设备，无论是桌面端还是移动端",
+      title: '响应式设计',
+      description: '完美适配各种设备，无论是桌面端还是移动端',
     },
     {
-      title: "SEO优化",
-      description: "针对搜索引擎优化，让您的内容更容易被发现",
+      title: 'SEO优化',
+      description: '针对搜索引擎优化，让您的内容更容易被发现',
     },
     {
-      title: "安全可靠",
-      description: "采用现代安全实践，保护用户数据和隐私",
+      title: '安全可靠',
+      description: '采用现代安全实践，保护用户数据和隐私',
     },
-  ]
+  ];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -89,7 +104,9 @@ export default function AboutPage() {
         <Card>
           <CardHeader>
             <CardTitle>联系我们</CardTitle>
-            <CardDescription>如果您有任何问题或建议，欢迎联系我们</CardDescription>
+            <CardDescription>
+              如果您有任何问题或建议，欢迎联系我们
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col space-y-4">
@@ -110,5 +127,5 @@ export default function AboutPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

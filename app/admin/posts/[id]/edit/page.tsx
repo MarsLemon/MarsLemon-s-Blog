@@ -1,9 +1,9 @@
-import { notFound } from "next/navigation";
-import { PostEditor } from "@/components/admin/post-editor";
-import { getPostById } from "@/lib/posts";
-import { redirect } from "next/navigation";
-import { env } from "@/lib/env";
-import { cookies } from "next/headers";
+import { notFound } from 'next/navigation';
+import { PostEditor } from '@/components/admin/post-editor';
+import { getPostById } from '@/lib/posts';
+import { redirect } from 'next/navigation';
+import { env } from '@/lib/env';
+import { cookies } from 'next/headers';
 
 interface EditPostPageProps {
   params: {
@@ -25,15 +25,15 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
   }
 
   const handleSave = async (postData: any) => {
-    "use server";
+    'use server';
 
     try {
       const response = await fetch(
         `${env.NEXT_PUBLIC_BASE_URL}/api/admin/posts/${postId}`,
         {
-          method: "PUT",
+          method: 'PUT',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Cookie: await cookies().toString(),
           },
           body: JSON.stringify(postData),
@@ -42,10 +42,10 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "更新文章失败");
+        throw new Error(errorData.message || '更新文章失败');
       }
 
-      redirect("/admin");
+      redirect('/admin');
     } catch (error) {
       throw error;
     }

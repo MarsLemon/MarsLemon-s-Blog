@@ -23,7 +23,9 @@ export default function PrivacyPage() {
           </ul>
 
           <h2 className="text-2xl font-semibold mb-4">3. 信息共享</h2>
-          <p className="mb-4">我们不会向第三方出售、交易或转让您的个人信息，除非：</p>
+          <p className="mb-4">
+            我们不会向第三方出售、交易或转让您的个人信息，除非：
+          </p>
           <ul className="list-disc pl-6 mb-4">
             <li>获得您的明确同意</li>
             <li>法律要求</li>
@@ -31,7 +33,9 @@ export default function PrivacyPage() {
           </ul>
 
           <h2 className="text-2xl font-semibold mb-4">4. 数据安全</h2>
-          <p className="mb-4">我们采取适当的安全措施来保护您的个人信息，包括：</p>
+          <p className="mb-4">
+            我们采取适当的安全措施来保护您的个人信息，包括：
+          </p>
           <ul className="list-disc pl-6 mb-4">
             <li>数据加密</li>
             <li>访问控制</li>
@@ -57,14 +61,20 @@ export default function PrivacyPage() {
           </ul>
 
           <h2 className="text-2xl font-semibold mb-4">7. 政策更新</h2>
-          <p className="mb-4">我们可能会不时更新此隐私政策。重大变更将通过网站通知或邮件通知用户。</p>
+          <p className="mb-4">
+            我们可能会不时更新此隐私政策。重大变更将通过网站通知或邮件通知用户。
+          </p>
 
           <h2 className="text-2xl font-semibold mb-4">8. 联系我们</h2>
-          <p className="mb-4">如果您对此隐私政策有任何疑问，请联系我们：privacy@example.com</p>
+          <p className="mb-4">
+            如果您对此隐私政策有任何疑问，请联系我们：privacy@example.com
+          </p>
 
-          <p className="text-sm text-muted-foreground mt-8">最后更新时间：{new Date().toLocaleDateString("zh-CN")}</p>
+          <p className="text-sm text-muted-foreground mt-8">
+            最后更新时间：{new Date().toLocaleDateString('zh-CN')}
+          </p>
         </div>
       </div>
     </div>
-  )
+  );
 }

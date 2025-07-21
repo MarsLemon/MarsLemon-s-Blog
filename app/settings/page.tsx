@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useUser } from "@/lib/user-context";
+import { useState } from 'react';
+import { useUser } from '@/lib/user-context';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Settings,
   Moon,
@@ -31,10 +31,10 @@ import {
   Lock,
   Key,
   Shield,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
-import { useToast } from "@/hooks/use-toast";
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
+import { useToast } from '@/hooks/use-toast';
 
 export default function SettingsPage() {
   const { user, loading, logout } = useUser();
@@ -45,9 +45,9 @@ export default function SettingsPage() {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [isTwoFactorDialogOpen, setIsTwoFactorDialogOpen] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
   const router = useRouter();
@@ -61,51 +61,51 @@ export default function SettingsPage() {
   }
 
   if (!user) {
-    router.push("/login");
+    router.push('/login');
     return null;
   }
 
   const handleLogout = async () => {
     try {
       await logout();
-      router.push("/");
+      router.push('/');
     } catch (error) {
-      console.error("退出登录失败:", error);
+      console.error('退出登录失败:', error);
     }
   };
 
   const handleSaveSettings = () => {
     toast({
-      title: "设置已保存",
-      description: "",
+      title: '设置已保存',
+      description: '',
     });
   };
 
   const handlePasswordChange = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       toast({
-        title: "错误",
-        description: "新密码和确认密码不匹配",
-        variant: "destructive",
+        title: '错误',
+        description: '新密码和确认密码不匹配',
+        variant: 'destructive',
       });
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
       toast({
-        title: "错误",
-        description: "新密码长度至少6位",
-        variant: "destructive",
+        title: '错误',
+        description: '新密码长度至少6位',
+        variant: 'destructive',
       });
       return;
     }
 
     setPasswordLoading(true);
     try {
-      const response = await fetch("/api/auth/change-password", {
-        method: "POST",
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           currentPassword: passwordForm.currentPassword,
@@ -116,27 +116,27 @@ export default function SettingsPage() {
       const data = await response.json();
       if (response.ok) {
         toast({
-          title: "密码修改成功",
-          description: "",
+          title: '密码修改成功',
+          description: '',
         });
         setIsPasswordDialogOpen(false);
         setPasswordForm({
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
         });
       } else {
         toast({
-          title: "错误",
-          description: data.message || "密码修改失败",
-          variant: "destructive",
+          title: '错误',
+          description: data.message || '密码修改失败',
+          variant: 'destructive',
         });
       }
     } catch (error) {
       toast({
-        title: "错误",
-        description: "网络错误，请稍后重试",
-        variant: "destructive",
+        title: '错误',
+        description: '网络错误，请稍后重试',
+        variant: 'destructive',
       });
     } finally {
       setPasswordLoading(false);
@@ -148,8 +148,8 @@ export default function SettingsPage() {
       // 禁用两步验证
       setTwoFactorEnabled(false);
       toast({
-        title: "两步验证已禁用",
-        description: "",
+        title: '两步验证已禁用',
+        description: '',
       });
     } else {
       // 启用两步验证
@@ -162,8 +162,8 @@ export default function SettingsPage() {
     setTwoFactorEnabled(true);
     setIsTwoFactorDialogOpen(false);
     toast({
-      title: "两步验证已启用",
-      description: "",
+      title: '两步验证已启用',
+      description: '',
     });
   };
 
@@ -190,25 +190,25 @@ export default function SettingsPage() {
                   <Label>主题模式</Label>
                   <div className="flex gap-2">
                     <Button
-                      variant={theme === "light" ? "default" : "outline"}
+                      variant={theme === 'light' ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setTheme("light")}
+                      onClick={() => setTheme('light')}
                     >
                       <Sun className="mr-2 h-4 w-4" />
                       浅色
                     </Button>
                     <Button
-                      variant={theme === "dark" ? "default" : "outline"}
+                      variant={theme === 'dark' ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setTheme("dark")}
+                      onClick={() => setTheme('dark')}
                     >
                       <Moon className="mr-2 h-4 w-4" />
                       深色
                     </Button>
                     <Button
-                      variant={theme === "system" ? "default" : "outline"}
+                      variant={theme === 'system' ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setTheme("system")}
+                      onClick={() => setTheme('system')}
                     >
                       <Monitor className="mr-2 h-4 w-4" />
                       跟随系统
@@ -329,7 +329,7 @@ export default function SettingsPage() {
                           onClick={handlePasswordChange}
                           disabled={passwordLoading}
                         >
-                          {passwordLoading ? "修改中..." : "确认修改"}
+                          {passwordLoading ? '修改中...' : '确认修改'}
                         </Button>
                         <Button
                           variant="outline"
@@ -354,7 +354,7 @@ export default function SettingsPage() {
                       onClick={handleTwoFactorToggle}
                     >
                       <Shield className="mr-2 h-4 w-4" />
-                      两步验证 {twoFactorEnabled ? "(已启用)" : "(未启用)"}
+                      两步验证 {twoFactorEnabled ? '(已启用)' : '(未启用)'}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
@@ -392,7 +392,7 @@ export default function SettingsPage() {
             {/* 保存按钮 */}
             <div className="flex gap-2">
               <Button onClick={handleSaveSettings}>保存设置</Button>
-              <Button variant="outline" onClick={() => router.push("/")}>
+              <Button variant="outline" onClick={() => router.push('/')}>
                 返回首页
               </Button>
             </div>

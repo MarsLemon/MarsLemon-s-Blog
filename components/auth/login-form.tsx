@@ -1,64 +1,71 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
-import { useUser } from "@/lib/user-context"
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@/lib/user-context';
 
 export default function LoginForm() {
-  const [identifier, setIdentifier] = useState("") // 可以是用户名或邮箱
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
-  const { toast } = useToast()
-  const { refreshUser } = useUser()
+  const [identifier, setIdentifier] = useState(''); // 可以是用户名或邮箱
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+  const { refreshUser } = useUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ identifier, password }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
         toast({
-          title: "登录成功",
-          description: `欢迎回来，${data.user?.username || "用户"}！`,
-        })
-        refreshUser() // 刷新用户上下文
-        router.push("/") // 登录成功后跳转到首页
+          title: '登录成功',
+          description: `欢迎回来，${data.user?.username || '用户'}！`,
+        });
+        refreshUser(); // 刷新用户上下文
+        router.push('/'); // 登录成功后跳转到首页
       } else {
         toast({
-          title: "登录失败",
-          description: data.message || "用户名或密码不正确。",
-          variant: "destructive",
-        })
+          title: '登录失败',
+          description: data.message || '用户名或密码不正确。',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
-      console.error("登录请求失败:", error)
+      console.error('登录请求失败:', error);
       toast({
-        title: "错误",
-        description: "网络或服务器错误，请稍后再试。",
-        variant: "destructive",
-      })
+        title: '错误',
+        description: '网络或服务器错误，请稍后再试。',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md">
@@ -91,7 +98,7 @@ export default function LoginForm() {
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "登录中..." : "登录"}
+            {loading ? '登录中...' : '登录'}
           </Button>
         </form>
       </CardContent>
@@ -104,5 +111,5 @@ export default function LoginForm() {
         </p>
       </CardFooter>
     </Card>
-  )
+  );
 }

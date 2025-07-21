@@ -18,7 +18,9 @@ export default function TermsPage() {
           <h2 className="text-2xl font-semibold mb-4">3. 用户责任</h2>
           <ul className="list-disc pl-6 mb-4">
             <li>用户必须提供真实、准确的注册信息</li>
-            <li>用户不得发布违法、有害、威胁、辱骂、骚扰、诽谤、粗俗、淫秽或其他不当内容</li>
+            <li>
+              用户不得发布违法、有害、威胁、辱骂、骚扰、诽谤、粗俗、淫秽或其他不当内容
+            </li>
             <li>用户不得进行任何可能损害网站安全的行为</li>
             <li>用户对其账户的所有活动负责</li>
           </ul>
@@ -39,11 +41,15 @@ export default function TermsPage() {
           </p>
 
           <h2 className="text-2xl font-semibold mb-4">7. 联系我们</h2>
-          <p className="mb-4">如果您对这些服务条款有任何疑问，请通过邮箱联系我们：support@example.com</p>
+          <p className="mb-4">
+            如果您对这些服务条款有任何疑问，请通过邮箱联系我们：support@example.com
+          </p>
 
-          <p className="text-sm text-muted-foreground mt-8">最后更新时间：{new Date().toLocaleDateString("zh-CN")}</p>
+          <p className="text-sm text-muted-foreground mt-8">
+            最后更新时间：{new Date().toLocaleDateString('zh-CN')}
+          </p>
         </div>
       </div>
     </div>
-  )
+  );
 }

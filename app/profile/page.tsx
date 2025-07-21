@@ -1,49 +1,49 @@
-"use client";
+'use client';
 
-import type React from "react";
+import type React from 'react';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useUser } from "@/lib/user-context";
-import { ProfileForm } from "@/components/auth/profile-form";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/lib/user-context';
+import { ProfileForm } from '@/components/auth/profile-form';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { Switch } from "@/components/ui/switch";
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
+import { Switch } from '@/components/ui/switch';
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from "@/components/ui/input-otp";
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
+} from '@/components/ui/input-otp';
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 
 export default function ProfilePage() {
   const { user, loading: userLoading, refreshUser } = useUser();
   const router = useRouter();
   const { toast } = useToast();
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [passwordChangeLoading, setPasswordChangeLoading] = useState(false);
-  const [passwordChangeError, setPasswordChangeError] = useState("");
+  const [passwordChangeError, setPasswordChangeError] = useState('');
 
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [twoFactorCode, setTwoFactorCode] = useState("");
+  const [twoFactorCode, setTwoFactorCode] = useState('');
   const [twoFactorLoading, setTwoFactorLoading] = useState(false);
-  const [twoFactorError, setTwoFactorError] = useState("");
+  const [twoFactorError, setTwoFactorError] = useState('');
 
   useEffect(() => {
     if (!userLoading && !user) {
-      router.push("/login");
+      router.push('/login');
     }
     if (user) {
       // Assuming user object might have a two_factor_enabled field
@@ -54,25 +54,25 @@ export default function ProfilePage() {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordChangeLoading(true);
-    setPasswordChangeError("");
+    setPasswordChangeError('');
 
     if (newPassword !== confirmNewPassword) {
-      setPasswordChangeError("新密码和确认密码不匹配。");
+      setPasswordChangeError('新密码和确认密码不匹配。');
       setPasswordChangeLoading(false);
       return;
     }
 
     if (newPassword.length < 6) {
-      setPasswordChangeError("新密码长度至少6位。");
+      setPasswordChangeError('新密码长度至少6位。');
       setPasswordChangeLoading(false);
       return;
     }
 
     try {
-      const response = await fetch("/api/auth/change-password", {
-        method: "POST",
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ currentPassword, newPassword }),
       });
@@ -81,27 +81,27 @@ export default function ProfilePage() {
 
       if (response.ok) {
         toast({
-          title: "密码修改成功",
-          description: "您的密码已成功更新。",
+          title: '密码修改成功',
+          description: '您的密码已成功更新。',
         });
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmNewPassword("");
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmNewPassword('');
       } else {
-        setPasswordChangeError(data.message || "密码修改失败。");
+        setPasswordChangeError(data.message || '密码修改失败。');
         toast({
-          title: "密码修改失败",
-          description: data.message || "请检查当前密码是否正确。",
-          variant: "destructive",
+          title: '密码修改失败',
+          description: data.message || '请检查当前密码是否正确。',
+          variant: 'destructive',
         });
       }
     } catch (error) {
-      console.error("密码修改请求失败:", error);
-      setPasswordChangeError("网络或服务器错误，请稍后再试。");
+      console.error('密码修改请求失败:', error);
+      setPasswordChangeError('网络或服务器错误，请稍后再试。');
       toast({
-        title: "错误",
-        description: "网络或服务器错误，请稍后再试。",
-        variant: "destructive",
+        title: '错误',
+        description: '网络或服务器错误，请稍后再试。',
+        variant: 'destructive',
       });
     } finally {
       setPasswordChangeLoading(false);
@@ -110,7 +110,7 @@ export default function ProfilePage() {
 
   const handleTwoFactorToggle = async (checked: boolean) => {
     setTwoFactorLoading(true);
-    setTwoFactorError("");
+    setTwoFactorError('');
     // Simulate API call
     try {
       // In a real application, you would make an API call here
@@ -118,17 +118,17 @@ export default function ProfilePage() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setTwoFactorEnabled(checked);
       toast({
-        title: "双重认证",
-        description: `双重认证已${checked ? "启用" : "禁用"}。`,
+        title: '双重认证',
+        description: `双重认证已${checked ? '启用' : '禁用'}。`,
       });
       // Refresh user context to reflect changes
       refreshUser();
     } catch (error) {
-      setTwoFactorError("更新双重认证状态失败。");
+      setTwoFactorError('更新双重认证状态失败。');
       toast({
-        title: "错误",
-        description: "更新双重认证状态失败。",
-        variant: "destructive",
+        title: '错误',
+        description: '更新双重认证状态失败。',
+        variant: 'destructive',
       });
     } finally {
       setTwoFactorLoading(false);
@@ -138,31 +138,31 @@ export default function ProfilePage() {
   const handleTwoFactorCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTwoFactorLoading(true);
-    setTwoFactorError("");
+    setTwoFactorError('');
     // Simulate API call for code verification
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      if (twoFactorCode === "123456") {
+      if (twoFactorCode === '123456') {
         // Example code
         toast({
-          title: "验证成功",
-          description: "双重认证代码已验证。",
+          title: '验证成功',
+          description: '双重认证代码已验证。',
         });
-        setTwoFactorCode("");
+        setTwoFactorCode('');
       } else {
-        setTwoFactorError("验证码不正确。");
+        setTwoFactorError('验证码不正确。');
         toast({
-          title: "验证失败",
-          description: "双重认证代码不正确。",
-          variant: "destructive",
+          title: '验证失败',
+          description: '双重认证代码不正确。',
+          variant: 'destructive',
         });
       }
     } catch (error) {
-      setTwoFactorError("验证双重认证代码失败。");
+      setTwoFactorError('验证双重认证代码失败。');
       toast({
-        title: "错误",
-        description: "验证双重认证代码失败。",
-        variant: "destructive",
+        title: '错误',
+        description: '验证双重认证代码失败。',
+        variant: 'destructive',
       });
     } finally {
       setTwoFactorLoading(false);
@@ -291,7 +291,7 @@ export default function ProfilePage() {
                     </InputOTPGroup>
                   </InputOTP>
                   <Button type="submit" disabled={twoFactorLoading}>
-                    {twoFactorLoading ? "验证中..." : "验证代码"}
+                    {twoFactorLoading ? '验证中...' : '验证代码'}
                   </Button>
                 </form>
               </div>

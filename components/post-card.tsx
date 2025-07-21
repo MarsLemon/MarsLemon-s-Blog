@@ -1,13 +1,13 @@
-import Link from "next/link";
-import Image from "next/image";
-import { CalendarIcon } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from 'next/link';
+import Image from 'next/image';
+import { CalendarIcon } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 
 interface Author {
   name: string;
@@ -34,7 +34,7 @@ export function PostCard({ post }: PostCardProps) {
       <Card className="overflow-hidden h-full transition-all hover:shadow-md">
         <div className="relative h-48 w-full overflow-hidden">
           <Image
-            src={post.coverImage || "/placeholder.svg"}
+            src={post.coverImage || '/placeholder.svg'}
             alt={post.title}
             fill
             className="object-cover transition-transform group-hover:scale-105"
@@ -56,7 +56,7 @@ export function PostCard({ post }: PostCardProps) {
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
               <AvatarImage
-                src={post.author?.avatar || "/placeholder.svg"}
+                src={post.author?.avatar || '/placeholder.svg'}
                 alt={post.author?.name}
               />
               <AvatarFallback>{post.author?.name.charAt(0)}</AvatarFallback>

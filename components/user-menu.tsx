@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import {
   DropdownMenu,
@@ -7,39 +7,39 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { useUser } from "@/lib/user-context"
-import { useRouter } from "next/navigation"
-import { useToast } from "@/hooks/use-toast"
-import Link from "next/link"
-import { User, Settings, Shield, LogOut, PlusCircle } from "lucide-react"
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { useUser } from '@/lib/user-context';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
+import { User, Settings, Shield, LogOut, PlusCircle } from 'lucide-react';
 
 export function UserMenu() {
-  const { user, logout } = useUser()
-  const router = useRouter()
-  const { toast } = useToast()
+  const { user, logout } = useUser();
+  const router = useRouter();
+  const { toast } = useToast();
 
   const handleLogout = async () => {
     try {
-      await logout()
+      await logout();
       toast({
-        title: "退出成功",
-        description: "您已成功退出登录。",
-      })
-      router.push("/")
+        title: '退出成功',
+        description: '您已成功退出登录。',
+      });
+      router.push('/');
     } catch (error) {
       toast({
-        title: "退出失败",
-        description: "退出登录时发生错误，请重试。",
-        variant: "destructive",
-      })
+        title: '退出失败',
+        description: '退出登录时发生错误，请重试。',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   if (!user) {
-    return null
+    return null;
   }
 
   return (
@@ -47,8 +47,13 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar_url || "/placeholder.svg?height=32&width=32"} alt={user.username} />
-            <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarImage
+              src={user.avatar_url || '/placeholder.svg?height=32&width=32'}
+              alt={user.username}
+            />
+            <AvatarFallback>
+              {user.username.charAt(0).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -56,8 +61,14 @@ export function UserMenu() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user.username}</p>
-            <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-            {user.is_admin && <p className="text-xs leading-none text-blue-600 font-medium">管理员</p>}
+            <p className="text-xs leading-none text-muted-foreground">
+              {user.email}
+            </p>
+            {user.is_admin && (
+              <p className="text-xs leading-none text-blue-600 font-medium">
+                管理员
+              </p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -97,5 +108,5 @@ export function UserMenu() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

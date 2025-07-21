@@ -1,62 +1,69 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function AdminRegisterPage() {
-  const [username, setUsername] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
-  const { toast } = useToast()
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ username, email, password }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
         toast({
-          title: "注册成功",
-          description: "您已成功注册并登录。",
-        })
-        router.push("/admin") // 注册成功后跳转到管理后台首页
+          title: '注册成功',
+          description: '您已成功注册并登录。',
+        });
+        router.push('/admin'); // 注册成功后跳转到管理后台首页
       } else {
         toast({
-          title: "注册失败",
-          description: data.message || "注册失败，请检查您的输入。",
-          variant: "destructive",
-        })
+          title: '注册失败',
+          description: data.message || '注册失败，请检查您的输入。',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
-      console.error("注册请求失败:", error)
+      console.error('注册请求失败:', error);
       toast({
-        title: "错误",
-        description: "网络或服务器错误，请稍后再试。",
-        variant: "destructive",
-      })
+        title: '错误',
+        description: '网络或服务器错误，请稍后再试。',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-gray-100 px-4 dark:bg-gray-950">
@@ -101,7 +108,7 @@ export default function AdminRegisterPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "注册中..." : "注册"}
+              {loading ? '注册中...' : '注册'}
             </Button>
           </form>
         </CardContent>
@@ -115,5 +122,5 @@ export default function AdminRegisterPage() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

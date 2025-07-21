@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import type React from "react";
+import type React from 'react';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardHeader,
@@ -11,15 +11,15 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function AdminLoginPageClient() {
-  const [identifier, setIdentifier] = useState(""); // 可以是用户名或邮箱
-  const [password, setPassword] = useState("");
+  const [identifier, setIdentifier] = useState(''); // 可以是用户名或邮箱
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -29,10 +29,10 @@ export default function AdminLoginPageClient() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ identifier, password }),
       });
@@ -41,23 +41,23 @@ export default function AdminLoginPageClient() {
 
       if (response.ok) {
         toast({
-          title: "登录成功",
-          description: "您已成功登录管理后台。",
+          title: '登录成功',
+          description: '您已成功登录管理后台。',
         });
-        router.push("/admin"); // 登录成功后跳转到管理后台首页
+        router.push('/admin'); // 登录成功后跳转到管理后台首页
       } else {
         toast({
-          title: "登录失败",
-          description: data.message || "用户名或密码不正确。",
-          variant: "destructive",
+          title: '登录失败',
+          description: data.message || '用户名或密码不正确。',
+          variant: 'destructive',
         });
       }
     } catch (error) {
-      console.error("登录请求失败:", error);
+      console.error('登录请求失败:', error);
       toast({
-        title: "错误",
-        description: "网络或服务器错误，请稍后再试。",
-        variant: "destructive",
+        title: '错误',
+        description: '网络或服务器错误，请稍后再试。',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -98,7 +98,7 @@ export default function AdminLoginPageClient() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "登录中..." : "登录"}
+              {loading ? '登录中...' : '登录'}
             </Button>
           </form>
         </CardContent>

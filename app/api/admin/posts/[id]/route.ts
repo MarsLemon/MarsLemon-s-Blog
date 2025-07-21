@@ -1,9 +1,9 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { neon } from "@neondatabase/serverless";
-import { verifyToken } from "@/lib/verify-token";
-import { generateSlug, extractExcerpt } from "@/lib/posts";
+import { type NextRequest, NextResponse } from 'next/server';
+import { neon } from '@neondatabase/serverless';
+import { verifyToken } from '@/lib/verify-token';
+import { generateSlug, extractExcerpt } from '@/lib/posts';
 
-import { env } from "@/lib/env";
+import { env } from '@/lib/env';
 const sql = neon(env.DATABASE_URL!);
 
 export async function GET(
@@ -13,12 +13,12 @@ export async function GET(
   try {
     const user = await verifyToken(request);
     if (!user || !user.is_admin) {
-      return NextResponse.json({ message: "需要管理员权限" }, { status: 403 });
+      return NextResponse.json({ message: '需要管理员权限' }, { status: 403 });
     }
 
     const postId = Number.parseInt((await params).id);
     if (isNaN(postId)) {
-      return NextResponse.json({ message: "无效的文章ID" }, { status: 400 });
+      return NextResponse.json({ message: '无效的文章ID' }, { status: 400 });
     }
 
     const posts = await sql`
@@ -31,13 +31,13 @@ export async function GET(
     `;
 
     if (posts.length === 0) {
-      return NextResponse.json({ message: "文章不存在" }, { status: 404 });
+      return NextResponse.json({ message: '文章不存在' }, { status: 404 });
     }
 
     return NextResponse.json(posts[0]);
   } catch (error) {
-    console.error("获取文章详情错误:", error);
-    return NextResponse.json({ message: "获取文章详情失败" }, { status: 500 });
+    console.error('获取文章详情错误:', error);
+    return NextResponse.json({ message: '获取文章详情失败' }, { status: 500 });
   }
 }
 
@@ -48,12 +48,12 @@ export async function PUT(
   try {
     const user = await verifyToken(request);
     if (!user || !user.is_admin) {
-      return NextResponse.json({ message: "需要管理员权限" }, { status: 403 });
+      return NextResponse.json({ message: '需要管理员权限' }, { status: 403 });
     }
 
     const postId = Number.parseInt((await params).id);
     if (isNaN(postId)) {
-      return NextResponse.json({ message: "无效的文章ID" }, { status: 400 });
+      return NextResponse.json({ message: '无效的文章ID' }, { status: 400 });
     }
 
     const body = await request.json();
@@ -77,14 +77,14 @@ export async function PUT(
         RETURNING id, title, slug, updated_at
       `;
       return NextResponse.json({
-        message: "文章更新成功",
+        message: '文章更新成功',
         post: result[0],
       });
     }
 
     if (!title || !content) {
       return NextResponse.json(
-        { message: "标题和内容是必填项" },
+        { message: '标题和内容是必填项' },
         { status: 400 }
       );
     }
@@ -99,7 +99,7 @@ export async function PUT(
 
     if (existingPost.length > 0) {
       return NextResponse.json(
-        { message: "文章标题已存在，请使用不同的标题" },
+        { message: '文章标题已存在，请使用不同的标题' },
         { status: 400 }
       );
     }
@@ -121,16 +121,16 @@ export async function PUT(
     `;
 
     if (result.length === 0) {
-      return NextResponse.json({ message: "文章不存在" }, { status: 404 });
+      return NextResponse.json({ message: '文章不存在' }, { status: 404 });
     }
 
     return NextResponse.json({
-      message: "文章更新成功",
+      message: '文章更新成功',
       post: result[0],
     });
   } catch (error) {
-    console.error("更新文章错误:", error);
-    return NextResponse.json({ message: "更新文章失败" }, { status: 500 });
+    console.error('更新文章错误:', error);
+    return NextResponse.json({ message: '更新文章失败' }, { status: 500 });
   }
 }
 
@@ -141,12 +141,12 @@ export async function DELETE(
   try {
     const user = await verifyToken(request);
     if (!user || !user.is_admin) {
-      return NextResponse.json({ message: "需要管理员权限" }, { status: 403 });
+      return NextResponse.json({ message: '需要管理员权限' }, { status: 403 });
     }
 
     const postId = Number.parseInt((await params).id);
     if (isNaN(postId)) {
-      return NextResponse.json({ message: "无效的文章ID" }, { status: 400 });
+      return NextResponse.json({ message: '无效的文章ID' }, { status: 400 });
     }
 
     // 删除文章
@@ -156,15 +156,15 @@ export async function DELETE(
     `;
 
     if (result.length === 0) {
-      return NextResponse.json({ message: "文章不存在" }, { status: 404 });
+      return NextResponse.json({ message: '文章不存在' }, { status: 404 });
     }
 
     return NextResponse.json({
-      message: "文章删除成功",
+      message: '文章删除成功',
       post: result[0],
     });
   } catch (error) {
-    console.error("删除文章错误:", error);
-    return NextResponse.json({ message: "删除文章失败" }, { status: 500 });
+    console.error('删除文章错误:', error);
+    return NextResponse.json({ message: '删除文章失败' }, { status: 500 });
   }
 }

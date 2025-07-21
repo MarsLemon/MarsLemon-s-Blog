@@ -1,5 +1,5 @@
-import { neon } from "@neondatabase/serverless";
-import { env } from "./env";
+import { neon } from '@neondatabase/serverless';
+import { env } from './env';
 
 /**
  * A thin wrapper around the Neon serverless SQL client.

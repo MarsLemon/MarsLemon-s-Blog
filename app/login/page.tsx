@@ -1,62 +1,68 @@
-"use client"
+'use client';
 
-import type React from "react"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { useUser } from "@/lib/user-context"
-import { useToast } from "@/hooks/use-toast"
+import type React from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { useUser } from '@/lib/user-context';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
-  const [identifier, setIdentifier] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
-  const { refreshUser } = useUser()
-  const { toast } = useToast()
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { refreshUser } = useUser();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        credentials: "include",
+        credentials: 'include',
         body: JSON.stringify({ identifier, password }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
         // 刷新用户状态
-        await refreshUser()
+        await refreshUser();
         // 跳转到首页
-        router.push("/")
+        router.push('/');
       } else {
         toast({
-          title: "登录失败",
-          description: data.error || "登录失败",
-          variant: "destructive",
-        })
+          title: '登录失败',
+          description: data.error || '登录失败',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
-        title: "网络错误",
-        description: "请稍后重试",
-        variant: "destructive",
-      })
+        title: '网络错误',
+        description: '请稍后重试',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -92,12 +98,12 @@ export default function LoginPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "登录中..." : "登录"}
+              {loading ? '登录中...' : '登录'}
             </Button>
           </form>
 
           <div className="mt-4 text-center text-sm">
-            还没有账户？{" "}
+            还没有账户？{' '}
             <Link href="/register" className="text-blue-600 hover:underline">
               立即登录
             </Link>
@@ -105,5 +111,5 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

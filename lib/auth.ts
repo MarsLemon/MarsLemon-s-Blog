@@ -1,14 +1,14 @@
-import { SignJWT, jwtVerify } from "jose";
-import { cookies } from "next/headers";
-import { neon } from "@neondatabase/serverless";
-import bcrypt from "bcryptjs";
+import { SignJWT, jwtVerify } from 'jose';
+import { cookies } from 'next/headers';
+import { neon } from '@neondatabase/serverless';
+import bcrypt from 'bcryptjs';
 
-import { env } from "@/lib/env";
+import { env } from '@/lib/env';
 const sql = neon(env.DATABASE_URL!);
 
 const secretKey =
   env.JWT_SECRET ||
-  "default_secret_key_for_dev_only_please_change_this_in_prod";
+  'default_secret_key_for_dev_only_please_change_this_in_prod';
 const encodedKey = new TextEncoder().encode(secretKey);
 
 export interface User {
@@ -24,22 +24,22 @@ export interface User {
 
 export async function encrypt(payload: any) {
   return new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime("2h")
+    .setExpirationTime('2h')
     .sign(encodedKey);
 }
 
 export async function decrypt(
-  session: string | undefined = ""
+  session: string | undefined = ''
 ): Promise<any | null> {
   try {
     const { payload } = await jwtVerify(session, encodedKey, {
-      algorithms: ["HS256"],
+      algorithms: ['HS256'],
     });
     return payload;
   } catch (error) {
-    console.error("Failed to decrypt session:", error);
+    console.error('Failed to decrypt session:', error);
     return null;
   }
 }
@@ -59,21 +59,21 @@ export async function createSession(
     expiresAt,
   });
 
-  (await cookies()).set("session-token", session, {
+  (await cookies()).set('session-token', session, {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
+    secure: env.NODE_ENV === 'production',
     expires: expiresAt,
-    sameSite: "lax",
-    path: "/",
+    sameSite: 'lax',
+    path: '/',
   });
 }
 
 export async function deleteSession() {
-  (await cookies()).delete("session-token");
+  (await cookies()).delete('session-token');
 }
 
 export async function getSessionUser(): Promise<User | null> {
-  const session = (await cookies()).get("session-token")?.value;
+  const session = (await cookies()).get('session-token')?.value;
   if (!session) return null;
 
   const payload = await decrypt(session);
@@ -187,16 +187,19 @@ export async function hashPassword(password: string): Promise<string> {
 
 // Token verification for API routes
 export async function verifyToken(request: Request): Promise<User | null> {
-  const cookieHeader = request.headers.get("cookie");
+  const cookieHeader = request.headers.get('cookie');
   if (!cookieHeader) return null;
 
-  const cookies = cookieHeader.split(";").reduce((acc, cookie) => {
-    const [key, value] = cookie.trim().split("=");
-    acc[key] = value;
-    return acc;
-  }, {} as Record<string, string>);
+  const cookies = cookieHeader.split(';').reduce(
+    (acc, cookie) => {
+      const [key, value] = cookie.trim().split('=');
+      acc[key] = value;
+      return acc;
+    },
+    {} as Record<string, string>
+  );
 
-  const sessionToken = cookies["session-token"];
+  const sessionToken = cookies['session-token'];
   if (!sessionToken) return null;
 
   const payload = await decrypt(sessionToken);
