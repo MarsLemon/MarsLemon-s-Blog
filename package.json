@@ -48,6 +48,8 @@
     "crypto": "latest",
     "date-fns": "4.1.0",
     "embla-carousel-react": "latest",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.2",
     "highlight.js": "latest",
     "input-otp": "latest",
     "jose": "latest",
