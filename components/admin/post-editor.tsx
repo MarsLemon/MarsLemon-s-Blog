@@ -37,11 +37,10 @@ export function PostEditor({ post, onSave }: PostEditorProps) {
   const [isFeatured, setIsFeatured] = useState(post?.is_featured || false)
   const [isPinned, setIsPinned] = useState(post?.is_pinned || false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const { toast } = useToast()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
-  const { toast } = useToast()
 
   // 文件上传限制
   const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -162,10 +161,13 @@ export function PostEditor({ post, onSave }: PostEditorProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
 
     if (!title.trim() || !content.trim()) {
-      setError("标题和内容是必填项")
+      toast({
+        title: "错误",
+        description: "标题和内容是必填项",
+        variant: "destructive",
+      })
       return
     }
 
@@ -180,8 +182,16 @@ export function PostEditor({ post, onSave }: PostEditorProps) {
         is_featured: isFeatured,
         is_pinned: isPinned,
       })
+      toast({
+        title: "保存成功",
+        description: post ? "文章已更新。" : "文章已创建。",
+      })
     } catch (error: any) {
-      setError(error.message || "保存失败")
+      toast({
+        title: "保存失败",
+        description: error.message || "保存文章失败。",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
@@ -209,13 +219,6 @@ export function PostEditor({ post, onSave }: PostEditorProps) {
   return (
     <div className="max-w-4xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
         <Card>
           <CardHeader>
             <CardTitle>文章信息</CardTitle>

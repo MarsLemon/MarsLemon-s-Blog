@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useToast } from "@/hooks/use-toast"
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("")
@@ -17,15 +17,18 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
   const router = useRouter()
+  const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
 
     if (password !== confirmPassword) {
-      setError("密码不匹配")
+      toast({
+        title: "注册失败",
+        description: "密码不匹配",
+        variant: "destructive",
+      })
       return
     }
 
@@ -45,10 +48,18 @@ export default function RegisterPage() {
       if (response.ok) {
         router.push("/login")
       } else {
-        setError(data.error || "注册失败")
+        toast({
+          title: "注册失败",
+          description: data.error || "注册失败",
+          variant: "destructive",
+        })
       }
     } catch (error) {
-      setError("网络错误")
+      toast({
+        title: "网络错误",
+        description: "请稍后重试",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
@@ -63,12 +74,6 @@ export default function RegisterPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="username">用户名</Label>
               <Input

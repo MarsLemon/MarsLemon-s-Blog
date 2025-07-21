@@ -8,20 +8,19 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useUser } from "@/lib/user-context"
+import { useToast } from "@/hooks/use-toast"
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
   const router = useRouter()
   const { refreshUser } = useUser()
+  const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
     setLoading(true)
 
     try {
@@ -42,10 +41,18 @@ export default function LoginPage() {
         // 跳转到首页
         router.push("/")
       } else {
-        setError(data.error || "登录失败")
+        toast({
+          title: "登录失败",
+          description: data.error || "登录失败",
+          variant: "destructive",
+        })
       }
     } catch (error) {
-      setError("网络错误")
+      toast({
+        title: "网络错误",
+        description: "请稍后重试",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
@@ -60,12 +67,6 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="identifier">用户名或邮箱</Label>
               <Input
@@ -98,7 +99,7 @@ export default function LoginPage() {
           <div className="mt-4 text-center text-sm">
             还没有账户？{" "}
             <Link href="/register" className="text-blue-600 hover:underline">
-              立即注册
+              立即登录
             </Link>
           </div>
         </CardContent>
