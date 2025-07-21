@@ -73,6 +73,11 @@ export default function SettingsPage() {
 
     if (passwordForm.newPassword.length < 6) {
       setMessage("新密码长度至少6位")
+      toast({
+          title: "错误",
+          description:  "新密码长度至少6位",
+          variant: "destructive",
+        })
       return
     }
 
@@ -91,7 +96,6 @@ export default function SettingsPage() {
 
       const data = await response.json()
       if (response.ok) {
-        setMessage("密码修改成功")
         toast({
           title: "密码修改成功",
           description: "",
