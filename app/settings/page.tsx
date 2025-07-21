@@ -65,7 +65,6 @@ export default function SettingsPage() {
         title: "设置已保存",
         description:  "",
     })
-    setTimeout(() => setMessage(""), 3000)
   }
 
   const handlePasswordChange = async () => {
