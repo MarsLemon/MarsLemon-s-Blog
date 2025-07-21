@@ -112,7 +112,10 @@ export default function SettingsPage() {
     if (twoFactorEnabled) {
       // 禁用两步验证
       setTwoFactorEnabled(false)
-      setMessage("两步验证已禁用")
+      toast({
+        title: "两步验证已禁用",
+        description: "",
+      })
     } else {
       // 启用两步验证
       setIsTwoFactorDialogOpen(true)
